@@ -27,10 +27,11 @@ public class FilmController {
         return film;
     }
 
-    @PutMapping("/{id}")
-    public Film updateFilm (@PathVariable long id,@Valid @RequestBody Film film)
+    @PutMapping
+    public Film updateFilm (@Valid @RequestBody Film film)
             throws ValidationException {
         validate(film);
+        Long id = film.getId();
         if (storage.containsKey(id)){
             storage.put(id, film);
             log.info("Фильм {} отредактирован", film.getName());
@@ -56,7 +57,7 @@ public class FilmController {
                 .parse("28.12.1895", DateTimeFormatter.ofPattern("dd.MM.yyyy")))){
             throw new ValidationException("дата релиза — не раньше 28.12.1895");
         }
-        if (film.getDuration().isNegative()) {
+        if (film.getDuration() < 0) {
             throw new ValidationException("продолжительность фильма должна быть положительной");
         }
     }

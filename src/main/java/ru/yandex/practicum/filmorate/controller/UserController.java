@@ -32,10 +32,11 @@ public class UserController {
         return user;
     }
 
-    @PutMapping("/{id}")
-    public User updateUser (@PathVariable long id, @Valid @RequestBody User user)
+    @PutMapping
+    public User updateUser (@Valid @RequestBody User user)
             throws ValidationException {
         validate(user);
+        Long id = user.getId();
         if (storage.containsKey(id)){
             storage.put(id, user);
             log.info("Пользователь {} изменен", user.getName());
