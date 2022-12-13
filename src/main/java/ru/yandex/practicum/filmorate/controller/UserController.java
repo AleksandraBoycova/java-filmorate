@@ -14,7 +14,7 @@ import java.util.Map;
 
 @RestController
 @Slf4j
-@RequestMapping
+@RequestMapping ("users")
 public class UserController {
     private final Map<Long, User> storage = new HashMap<>();
     private static long counter = 1L;
