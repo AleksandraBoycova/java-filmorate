@@ -37,7 +37,7 @@ public class FilmController {
             log.info("Фильм {} отредактирован", film.getName());
         }
         else {
-            log.error("Фильм с id {} не найден", id);
+            throw new ValidationException("Фильм с id " + id +" не найден");
         }
         return film;
     }

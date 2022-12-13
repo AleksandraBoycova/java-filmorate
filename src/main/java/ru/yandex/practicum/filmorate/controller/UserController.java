@@ -24,7 +24,7 @@ public class UserController {
             throws ValidationException {
         validate(user);
         user.setId(counter++);
-        if (user.getName().isBlank()) {
+        if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
         storage.put(user.getId(), user);
@@ -42,7 +42,7 @@ public class UserController {
             log.info("Пользователь {} изменен", user.getName());
         }
         else {
-            log.error("Пользователь с id {} не найден", id);
+            throw new ValidationException ("Пользователь с id "+ id + " не найден");
         }
         return user;
     }
@@ -61,6 +61,7 @@ public class UserController {
         if (user.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException("Не верная дата рождения");
         }
+
     }
 
 }
