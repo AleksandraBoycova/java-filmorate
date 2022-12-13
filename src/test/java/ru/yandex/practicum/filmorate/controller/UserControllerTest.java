@@ -54,7 +54,7 @@ class UserControllerTest {
         User user = buildUser("email@mail.ru", "login", "name", "13.10.1990");
         User createUser = userController.createUser(user);
         createUser.setLogin("new-login");
-        User updateUser = userController.updateUser(createUser.getId(), createUser);
+        User updateUser = userController.updateUser(createUser);
         assertEquals("new-login", updateUser.getLogin());
     }
 

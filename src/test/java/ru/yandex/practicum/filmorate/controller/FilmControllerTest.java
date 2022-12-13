@@ -9,7 +9,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
@@ -52,7 +51,7 @@ class FilmControllerTest {
         Film film = buildFilm("Название фильма", "Описание фильма","11.12.2020", 120);
         Film createdFilm = filmController.createFilm(film);
         createdFilm.setDescription("новое описание");
-        Film updateFilm = filmController.updateFilm(createdFilm.getId(), createdFilm);
+        Film updateFilm = filmController.updateFilm(createdFilm);
         assertEquals("новое описание", updateFilm.getDescription());
     }
 
@@ -73,7 +72,7 @@ class FilmControllerTest {
         film.setDescription(description);
         film.setReleaseDate(LocalDate
                 .parse(dateString, DateTimeFormatter.ofPattern("dd.MM.yyyy")));
-        film.setDuration(Duration.ofMinutes(duration));
+        film.setDuration(duration);
         return film;
 
     }
