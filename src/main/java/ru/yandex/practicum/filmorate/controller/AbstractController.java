@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,8 +14,5 @@ public abstract class AbstractController <T>{
         return storage.values();
     }
 
-
     public abstract void validate (T entity) throws ValidationException;
-
-
 }
