@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import javax.validation.Valid;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
 
 @RestController
 @RequestMapping ("films")
@@ -38,6 +39,11 @@ public class FilmController extends AbstractController <Film>{
             throw new ValidationException("Фильм с id " + id +" не найден");
         }
         return film;
+    }
+
+    @GetMapping
+    public Collection<Film> getAll(){
+        return storage.values();
     }
 
     @Override

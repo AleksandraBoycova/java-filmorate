@@ -47,6 +47,11 @@ public class UserController extends AbstractController <User>{
         return user;
     }
 
+    @GetMapping
+    public Collection<User> getAll(){
+        return storage.values();
+    }
+
     @Override
     public void validate (User user) throws ValidationException {
         if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {

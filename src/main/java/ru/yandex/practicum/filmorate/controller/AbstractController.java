@@ -12,9 +12,6 @@ public abstract class AbstractController <T>{
     protected static long counter = 1L;
 
     public abstract void validate (T entity) throws ValidationException;
-    @GetMapping
-    public Collection<T> getAll(){
-        return storage.values();
-    }
+
 
 }
