@@ -42,10 +42,10 @@ public class FilmController extends AbstractController <Film>{
         return film;
     }
 
-    @GetMapping
-    public Collection<Film> getAll(){
-        return storage.values();
-    }
+    //@GetMapping
+    //public Collection<Film> getAll(){
+       // return storage.values();
+   // }
 
     @Override
     public void validate (Film film) throws ValidationException {

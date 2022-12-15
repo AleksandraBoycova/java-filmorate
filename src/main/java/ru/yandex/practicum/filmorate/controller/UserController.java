@@ -48,10 +48,10 @@ public class UserController extends AbstractController <User>{
         return user;
     }
 
-    @GetMapping
-    public Collection<User> getAll(){
-        return storage.values();
-    }
+    //@GetMapping
+    //public Collection<User> getAll(){
+       // return storage.values();
+   // }
 
     @Override
     public void validate (User user) throws ValidationException {
