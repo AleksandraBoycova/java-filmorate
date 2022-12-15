@@ -8,14 +8,11 @@ import ru.yandex.practicum.filmorate.model.Film;
 import javax.validation.Valid;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
 
 @RestController
 @RequestMapping ("films")
 @Slf4j
-public class FilmController {
-    private final Map<Long, Film> storage = new HashMap<>();
-    private static long counter = 1L;
+public class FilmController extends AbstractController <Film>{
 
     @PostMapping
     public Film createFilm (@Valid @RequestBody Film film)
@@ -30,6 +27,7 @@ public class FilmController {
     @PutMapping
     public Film updateFilm (@Valid @RequestBody Film film)
             throws ValidationException {
+        log.info("Обновляем фильм {}", film.getId());
         validate(film);
         Long id = film.getId();
         if (storage.containsKey(id)){
@@ -41,12 +39,9 @@ public class FilmController {
         }
         return film;
     }
-    @GetMapping
-    public Collection<Film> getAllFilms (){
-        return storage.values();
-    }
 
-    private void validate (Film film) throws ValidationException {
+    @Override
+    public void validate (Film film) throws ValidationException {
         if (film.getName().isBlank()){
             throw new ValidationException("Название фильма не может быть пустым");
         }

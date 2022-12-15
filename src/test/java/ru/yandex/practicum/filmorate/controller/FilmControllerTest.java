@@ -61,7 +61,7 @@ class FilmControllerTest {
         Film createdFilm = filmController.createFilm(film);
         Film film1 = buildFilm("Название фильма один", "Описание фильма новое","10.12.2020", 120);
         Film createdFilm1 = filmController.createFilm(film1);
-        Collection<Film> allFilms = filmController.getAllFilms();
+        Collection<Film> allFilms = filmController.getAll();
         assertEquals(2, allFilms.size());
 
     }

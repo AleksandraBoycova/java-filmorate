@@ -64,7 +64,7 @@ class UserControllerTest {
         User createUser = userController.createUser(user);
         User user1 = buildUser("email1@mail.ru", "login1", "name1", "13.10.1991");
         User createUser1 = userController.createUser(user);
-        Collection<User> allUsers = userController.getAllUsers();
+        Collection<User> allUsers = userController.getAll();
         assertEquals(2, allUsers.size());
 
     }

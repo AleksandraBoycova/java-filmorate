@@ -15,13 +15,12 @@ import java.util.Map;
 @RestController
 @Slf4j
 @RequestMapping ("users")
-public class UserController {
-    private final Map<Long, User> storage = new HashMap<>();
-    private static long counter = 1L;
+public class UserController extends AbstractController <User>{
 
     @PostMapping
     public User createUser (@Valid @RequestBody User user)
             throws ValidationException {
+        log.info("Создаем нового пользователя");
         validate(user);
         user.setId(counter++);
         if (user.getName() == null || user.getName().isBlank()) {
@@ -35,6 +34,7 @@ public class UserController {
     @PutMapping
     public User updateUser (@Valid @RequestBody User user)
             throws ValidationException {
+        log.info("Редактируем пользователя");
         validate(user);
         Long id = user.getId();
         if (storage.containsKey(id)){
@@ -46,12 +46,9 @@ public class UserController {
         }
         return user;
     }
-    @GetMapping
-    public Collection<User> getAllUsers (){
-        return storage.values();
-    }
 
-    private void validate (User user) throws ValidationException {
+    @Override
+    public void validate (User user) throws ValidationException {
         if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
            throw new  ValidationException ("Email введен не верно");
         }
