@@ -9,7 +9,7 @@ import java.util.Map;
 
 public abstract class AbstractController <T>{
     protected final Map<Long, T> storage = new HashMap<>();
-    protected static long counter = 1L;
+
 
     public abstract void validate (T entity) throws ValidationException;
 

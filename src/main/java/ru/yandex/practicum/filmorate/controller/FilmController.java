@@ -14,6 +14,7 @@ import java.util.Collection;
 @RequestMapping ("films")
 @Slf4j
 public class FilmController extends AbstractController <Film>{
+    private static long counter = 1L;
 
     @PostMapping
     public Film createFilm (@Valid @RequestBody Film film)

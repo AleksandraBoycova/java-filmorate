@@ -16,6 +16,7 @@ import java.util.Map;
 @Slf4j
 @RequestMapping ("users")
 public class UserController extends AbstractController <User>{
+    private static long counter = 1L;
 
     @PostMapping
     public User createUser (@Valid @RequestBody User user)
