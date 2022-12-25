@@ -13,6 +13,4 @@ public abstract class AbstractController <T>{
     public Collection<T> getAll(){
         return storage.values();
     }
-
-    public abstract void validate (T entity) throws ValidationException;
 }
