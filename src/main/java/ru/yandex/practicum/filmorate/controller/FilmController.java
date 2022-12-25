@@ -35,7 +35,7 @@ public class FilmController extends AbstractController<Film> {
 
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film)
-            throws ValidationException {
+            throws Exception {
         log.info("Обновляем фильм {}", film.getId());
         Film updatedFilm = service.updateFilm(film);
         log.info("Фильм {} отредактирован", film.getName());
@@ -43,7 +43,7 @@ public class FilmController extends AbstractController<Film> {
     }
 
     @DeleteMapping("{id}")
-    public Film deleteFilm (@PathVariable Long id) throws ValidationException {
+    public Film deleteFilm (@PathVariable Long id) throws Exception {
         log.info("Удаляем фильм {}", id);
         Film deleteFilm = service.deleteFilm(id);
         log.info("Фильм {} удален", deleteFilm.getName());
@@ -51,13 +51,13 @@ public class FilmController extends AbstractController<Film> {
     }
 
     @PutMapping("/films/{id}/like/{userId}")
-    public void likeFilm (@PathVariable Long id, @PathVariable Long userId) throws ValidationException {
+    public void likeFilm (@PathVariable Long id, @PathVariable Long userId) throws Exception {
         service.likeFilm(id, userId);
         log.info("Пользователь {} поставил лайк к фильму {}", userId, id);
     }
 
     @DeleteMapping("/films/{id}/like/{userId}")
-    public void dislikeFilm (@PathVariable Long id, @PathVariable Long userId) throws ValidationException {
+    public void dislikeFilm (@PathVariable Long id, @PathVariable Long userId) throws Exception {
         service.dislikeFilm(id, userId);
         log.info("Пользователь {} удалил лайк к фильму {}", userId, id);
     }
