@@ -1,0 +1,110 @@
+package ru.yandex.practicum.filmorate.storage;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Collection;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@WebMvcTest(InMemoryFilmStorage.class)
+class InMemoryFilmStorageTest {
+
+    @Autowired
+    private InMemoryFilmStorage storage;
+
+    private Film currentFilm;
+
+    @BeforeEach
+    void setUp() {
+        Film film = buildFilm("Морозко", "Сказка", "01.12.1980", 90);
+        currentFilm = storage.createFilm(film);
+        storage.createFilm(buildFilm("Снегурочка", "Сказка", "01.12.1981", 60));
+        storage.createFilm(buildFilm("Иван царевич и серый волк", "Сказка", "01.12.1985", 110));
+        storage.createFilm(buildFilm("Чебурашка", "Сказка", "01.12.1983", 30));
+    }
+
+    @AfterEach
+    void tearDown() {
+        storage.clearStorage();
+    }
+
+    @Test
+    void deleteFilm() throws Exception {
+        Film deletedFilm = storage.deleteFilm(currentFilm.getId());
+        assertThrows(FilmNotFoundException.class, () -> storage.getFilm(deletedFilm.getId()), "Фильм с id " + deletedFilm.getId() + " не найден");
+    }
+
+    @Test
+    void deleteFilmWithError() {
+        assertThrows(FilmNotFoundException.class, () -> storage.deleteFilm(Long.MAX_VALUE), "Фильм с id " + Long.MAX_VALUE + " не найден");
+    }
+
+    @Test
+    void getFilm() throws Exception {
+        Film filmFromStorage = storage.getFilm(currentFilm.getId());
+        assertEquals("Морозко", filmFromStorage.getName());
+        assertEquals("Сказка", filmFromStorage.getDescription());
+        assertEquals(getLocalDateFromString("01.12.1980"), filmFromStorage.getReleaseDate());
+        assertEquals(90, filmFromStorage.getDuration());
+    }
+
+    @Test
+    void getFilmWithError() {
+        assertThrows(FilmNotFoundException.class, () -> storage.getFilm(Long.MAX_VALUE), "Фильм с id " + Long.MAX_VALUE + " не найден");
+    }
+
+    @Test
+    void createFilm() {
+        Film film        = buildFilm("Название фильма", "Описание фильма", "11.12.2020", 120);
+        Film createdFilm = storage.createFilm(film);
+        assertNotNull(createdFilm.getId());
+    }
+
+    @Test
+    void updateFilm() throws Exception {
+        currentFilm.setDescription("Новогодняя сказка");
+        Long idBeforeUpdate = currentFilm.getId();
+        Film updateFilm     = storage.updateFilm(currentFilm);
+
+        assertEquals("Новогодняя сказка", updateFilm.getDescription());
+        assertEquals(idBeforeUpdate, currentFilm.getId());
+    }
+
+    @Test
+    void updateFilmWithError() {
+        Film f = buildFilm("Снегурочка", "Сказка", "01.12.1981", 60);
+        f.setId(Long.MAX_VALUE);
+
+        assertThrows(FilmNotFoundException.class, () -> storage.updateFilm(f), "Фильм с id " + Long.MAX_VALUE + " не найден");
+    }
+
+    @Test
+    void getAllFilms() {
+        Collection<Film> allFilms = storage.getAllFilms();
+        assertEquals(4, allFilms.size());
+
+    }
+
+    private static Film buildFilm(String name, String description, String dateString, int duration) {
+        Film film = new Film();
+        film.setName(name);
+        film.setDescription(description);
+        film.setReleaseDate(getLocalDateFromString(dateString));
+        film.setDuration(duration);
+        return film;
+
+    }
+
+    private static LocalDate getLocalDateFromString(String dateString) {
+        return LocalDate
+                .parse(dateString, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+    }
+}

@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
@@ -46,12 +47,14 @@ public class FilmService {
     public void likeFilm (Long filmId, Long userId) throws Exception {
         Film filmFromStorage = filmStorage.getFilm(filmId);
         filmFromStorage.getLikes().add(userId);
+        filmStorage.updateFilm(filmFromStorage);
     }
 
     public void dislikeFilm (Long filmId, Long userId) throws Exception {
         Film filmFromStorage = filmStorage.getFilm(filmId);
         if (filmFromStorage.getLikes().contains(userId)) {
             filmFromStorage.getLikes().remove(userId);
+            filmStorage.updateFilm(filmFromStorage);
         }
         else {
             throw new ValidationException("Пользователь " + userId + " не ставил лайк к фильму " + filmId);
@@ -59,9 +62,11 @@ public class FilmService {
     }
 
     public List <Film> getMostPopularFilms (Integer count) {
-        filmStorage.getAllFilms()
+        return filmStorage.getAllFilms()
                 .stream()
-                .sorted(Comparator.comparingLong((f1, f2) -> Long.compare(f1.getLikes().size(),f2.getLikes().size()))).reversed());
+                .sorted(Comparator.comparingInt(o -> o.getLikes().size()))
+                .skip(Math.max(0, filmStorage.getAllFilms().size() - (count == null ? 10 : count)))
+                .collect(Collectors.toList());
 
     }
 
