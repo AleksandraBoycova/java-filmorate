@@ -31,7 +31,7 @@ public class UserService extends AbstractService {
         if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
             throw new ValidationException(user, "Введен не верный логин", "login", user.getLogin());
         }
-        if (user.getName()==null && user.getName().isBlank()) {
+        if (user.getName()==null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {
