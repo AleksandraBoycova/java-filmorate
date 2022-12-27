@@ -11,7 +11,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 @ControllerAdvice
 public class ControllerExceptionHandler {
     @ExceptionHandler(ValidationException.class)
-    public ResponseEntity <String> handleValidationException (ValidationException e) {
+    public ResponseEntity <Object> handleValidationException (ValidationException e) {
        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 

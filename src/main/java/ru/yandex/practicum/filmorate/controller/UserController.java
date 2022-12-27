@@ -2,6 +2,8 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -24,12 +26,12 @@ public class UserController extends AbstractController<User> {
     }
 
     @PostMapping
-    public User createUser(@Valid @RequestBody User user)
+    public ResponseEntity<Object> createUser(@Valid @RequestBody User user)
             throws ValidationException {
         log.info("Создаем нового пользователя");
-        userService.createUser(user);
+        User createdUser = userService.createUser(user);
         log.info("Создан пользователь {}", user.getName());
-        return user;
+        return new ResponseEntity<>(createdUser, HttpStatus.OK);
     }
 
     @PutMapping
