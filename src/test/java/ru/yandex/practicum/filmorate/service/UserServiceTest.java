@@ -115,9 +115,14 @@ class UserServiceTest extends AbstractTest {
 
     @Test
     void getFriendsForUser() throws Exception {
+        User user3 = buildUser("user3@mail.ru", "user3", "Anna", "13.10.1990");
+        user3.getFriends().addAll(Set.of(1L,2L));
         User user1 = buildUser("user1@mail.ru", "user1", "Anna", "13.10.1990");
-        user1.getFriends().addAll(Set.of(1L,2L));
-        when(storage.getById(any())).thenReturn(user1);
+        User user2 = buildUser("user2@mail.ru", "user2", "Gosha", "13.10.1994");
+        user1.setId(1L);
+        user2.setId(2L);
+        when(storage.getById(any())).thenReturn(user3);
+        when(storage.getAll()).thenReturn(List.of(user1, user2));
         Collection<AbstractModel> friendsForUser = service.getFriendsForUser(1L);
         assertEquals(2, friendsForUser.size());
         assertTrue(friendsForUser.stream().map(User.class::cast).map(User::getId).collect(Collectors.toList()).containsAll(Set.of(1L,2L)));
@@ -127,7 +132,9 @@ class UserServiceTest extends AbstractTest {
     void getCommonFriends() throws Exception {
         User user1 = buildUser("user1@mail.ru", "user1", "Anna", "13.10.1990");
         User user3 = buildUser("user3@mail.ru", "user3", "Gosha", "13.10.1994");
+        User user2 = buildUser("user2@mail.ru", "user2", "Gosha", "13.10.1994");
         user1.setId(1L);
+        user2.setId(2L);
         user3.setId(3L);
 
         user1.getFriends().add(2L);
@@ -137,6 +144,7 @@ class UserServiceTest extends AbstractTest {
         user3.getFriends().add(2L);
 
         when(storage.getById(any())).thenReturn(user1).thenReturn(user3);
+        when(storage.getAll()).thenReturn(List.of(user1, user2, user3));
         Collection<AbstractModel> commonFriends = service.getCommonFriends(1L, 3L);
         assertEquals(1, commonFriends.size());
         assertTrue(commonFriends.stream().map(User.class::cast).map(User::getId).collect(Collectors.toList()).contains(2L));

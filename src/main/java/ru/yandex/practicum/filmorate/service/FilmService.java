@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.AbstractModel;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -30,7 +31,7 @@ public class FilmService extends AbstractService {
             filmFromStorage.getLikes().remove(userId);
             storage.update(filmFromStorage);
         } else {
-            throw new ValidationException("Пользователь " + userId + " не ставил лайк к фильму " + filmId);
+            throw new UserNotFoundException("Пользователь " + userId + " не ставил лайк к фильму " + filmId);
         }
     }
 
