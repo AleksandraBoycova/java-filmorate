@@ -16,6 +16,7 @@ import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -117,9 +118,9 @@ class UserServiceTest extends AbstractTest {
         User user1 = buildUser("user1@mail.ru", "user1", "Anna", "13.10.1990");
         user1.getFriends().addAll(Set.of(1L,2L));
         when(storage.getById(any())).thenReturn(user1);
-        Collection<Long> friendsForUser = service.getFriendsForUser(1L);
+        Collection<AbstractModel> friendsForUser = service.getFriendsForUser(1L);
         assertEquals(2, friendsForUser.size());
-        assertTrue(friendsForUser.containsAll(Set.of(1L,2L)));
+        assertTrue(friendsForUser.stream().map(User.class::cast).map(User::getId).collect(Collectors.toList()).containsAll(Set.of(1L,2L)));
     }
 
     @Test
@@ -136,9 +137,9 @@ class UserServiceTest extends AbstractTest {
         user3.getFriends().add(2L);
 
         when(storage.getById(any())).thenReturn(user1).thenReturn(user3);
-        Collection<Long> commonFriends = service.getCommonFriends(1L, 3L);
+        Collection<AbstractModel> commonFriends = service.getCommonFriends(1L, 3L);
         assertEquals(1, commonFriends.size());
-        assertTrue(commonFriends.contains(2L));
+        assertTrue(commonFriends.stream().map(User.class::cast).map(User::getId).collect(Collectors.toList()).contains(2L));
     }
 
     public static Stream<Arguments> prepareDataForCreateUser() {

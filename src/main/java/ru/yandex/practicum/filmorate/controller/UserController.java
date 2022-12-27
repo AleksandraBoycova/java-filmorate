@@ -52,14 +52,14 @@ public class UserController extends AbstractController {
     }
 
      @GetMapping ("/{id}/friends")
-    public Collection<Long> getFriendsForUser (@PathVariable Long id) throws Exception {
+    public Collection<AbstractModel> getFriendsForUser (@PathVariable Long id) throws Exception {
         log.info("Друзья пользователя {}", id);
        return userService.getFriendsForUser(id);
 
      }
 
      @GetMapping ("/{id}/friends/common/{otherId}")
-    public Collection<Long> getCommonFriends (@PathVariable Long id, @PathVariable Long otherId) throws Exception {
+    public Collection<AbstractModel> getCommonFriends (@PathVariable Long id, @PathVariable Long otherId) throws Exception {
         log.info("Общие друзья пользователей {} и {}", id, otherId);
         return userService.getCommonFriends(id, otherId);
      }

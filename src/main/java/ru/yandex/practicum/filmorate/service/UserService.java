@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +30,9 @@ public class UserService extends AbstractService {
         }
         if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
             throw new ValidationException(user, "Введен не верный логин", "login", user.getLogin());
+        }
+        if (user.getName()==null && user.getName().isBlank()) {
+            user.setName(user.getLogin());
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException(user, "Не верная дата рождения", "birthday", user.getBirthday());
@@ -58,17 +62,21 @@ public class UserService extends AbstractService {
         }
     }
 
-    public Collection<Long> getFriendsForUser(Long id) throws Exception {
+    public Collection<AbstractModel> getFriendsForUser(Long id) throws Exception {
         User user = (User) userStorage.getById(id);
-        return user.getFriends();
+        Set<Long> friends = user.getFriends();
+         return userStorage.getAll().stream().filter(u->friends.contains(u.getId())).collect(Collectors.toList());
+
     }
 
-    public Collection<Long> getCommonFriends(Long id, Long otherId) throws Exception {
+    public Collection<AbstractModel> getCommonFriends(Long id, Long otherId) throws Exception {
         User user      = (User) userStorage.getById(id);
         User otherUser = (User) userStorage.getById(otherId);
-        return user.getFriends().stream()
+        Collection<Long> commonFriends = user.getFriends().stream()
                 .distinct()
                 .filter(otherUser.getFriends()::contains)
                 .collect(Collectors.toSet());
+        return userStorage.getAll().stream().filter(u->commonFriends.contains(u.getId())).collect(Collectors.toList());
+
     }
 }
