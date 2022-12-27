@@ -35,19 +35,19 @@ public class FilmController extends AbstractController {
         return super.update(film);
     }
 
-    @PutMapping("/films/{id}/like/{userId}")
+    @PutMapping("/{id}/like/{userId}")
     public void likeFilm(@PathVariable Long id, @PathVariable Long userId) throws Exception {
         service.likeFilm(id, userId);
         log.info("Пользователь {} поставил лайк к фильму {}", userId, id);
     }
 
-    @DeleteMapping("/films/{id}/like/{userId}")
+    @DeleteMapping("/{id}/like/{userId}")
     public void dislikeFilm(@PathVariable Long id, @PathVariable Long userId) throws Exception {
         service.dislikeFilm(id, userId);
         log.info("Пользователь {} удалил лайк к фильму {}", userId, id);
     }
 
-    @GetMapping("/films/popular")
+    @GetMapping("/popular")
     public List<Film> getPopularFilms(@RequestParam(value = "count", required = false) Integer count) {
         return service.getMostPopularFilms(count);
     }
