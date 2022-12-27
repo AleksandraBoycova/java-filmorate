@@ -1,88 +1,65 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.AbstractModel;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class FilmService {
-    private FilmStorage filmStorage;
-
-    @Autowired
-    public FilmService(FilmStorage filmStorage) {
-        this.filmStorage = filmStorage;
+public class FilmService extends AbstractService {
+    public FilmService(InMemoryFilmStorage storage) {
+        super(storage);
     }
 
-   public Film createFilm(Film film) throws ValidationException {
-        validate(film);
-        return filmStorage.createFilm(film);
-    }
-
-   public Film updateFilm(Film film) throws Exception {
-        validate(film);
-        return filmStorage.updateFilm(film);
-    }
-
-   public Film deleteFilm(Long id) throws Exception {
-        return filmStorage.deleteFilm(id);
-    }
-
-   public Collection<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
-    }
-
-   public Film getFilm(Long id) throws Exception {
-        return filmStorage.getFilm(id);
-    }
-
-    public void likeFilm (Long filmId, Long userId) throws Exception {
-        Film filmFromStorage = filmStorage.getFilm(filmId);
+    public void likeFilm(Long filmId, Long userId) throws Exception {
+        Film filmFromStorage = (Film) storage.getById(filmId);
         filmFromStorage.getLikes().add(userId);
-        filmStorage.updateFilm(filmFromStorage);
+        storage.update(filmFromStorage);
     }
 
-    public void dislikeFilm (Long filmId, Long userId) throws Exception {
-        Film filmFromStorage = filmStorage.getFilm(filmId);
+    public void dislikeFilm(Long filmId, Long userId) throws Exception {
+        Film filmFromStorage = (Film) storage.getById(filmId);
         if (filmFromStorage.getLikes().contains(userId)) {
             filmFromStorage.getLikes().remove(userId);
-            filmStorage.updateFilm(filmFromStorage);
-        }
-        else {
+            storage.update(filmFromStorage);
+        } else {
             throw new ValidationException("Пользователь " + userId + " не ставил лайк к фильму " + filmId);
         }
     }
 
-    public List <Film> getMostPopularFilms (Integer count) {
-        return filmStorage.getAllFilms()
+    public List<Film> getMostPopularFilms(Integer count) {
+        return storage.getAll()
                 .stream()
+                .map(Film.class::cast)
                 .sorted(Comparator.comparingInt(o -> o.getLikes().size()))
-                .skip(Math.max(0, filmStorage.getAllFilms().size() - (count == null ? 10 : count)))
+                .skip(Math.max(0, storage.getAll().size() - (count == null ? 10 : count)))
                 .collect(Collectors.toList());
 
     }
 
-    private void validate(Film film) throws ValidationException {
+    @Override
+    protected void validate(AbstractModel abstractModel) throws ValidationException {
+        Film film = (Film) abstractModel;
         if (film.getName().isBlank()) {
-            throw new ValidationException("Название фильма не может быть пустым");
+            throw new ValidationException(film, "Название фильма не может быть пустым", "name", film.getName());
         }
         if (film.getDescription().length() > 200) {
-            throw new ValidationException("максимальная длина описания — 200 символов");
+            throw new ValidationException(film, "максимальная длина описания — 200 символов", "description", film.getDescription());
         }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         if (film.getReleaseDate().isBefore(LocalDate
-                .parse("28.12.1895", DateTimeFormatter.ofPattern("dd.MM.yyyy")))) {
-            throw new ValidationException("дата релиза — не раньше 28.12.1895");
+                .parse("28.12.1895", formatter))) {
+            throw new ValidationException(film, "дата релиза — не раньше 28.12.1895", "releaseDate", film.getReleaseDate().format(formatter));
         }
         if (film.getDuration() < 0) {
-            throw new ValidationException("продолжительность фильма должна быть положительной");
+            throw new ValidationException(film, "продолжительность фильма должна быть положительной", "duration", film.getDuration());
         }
     }
 }

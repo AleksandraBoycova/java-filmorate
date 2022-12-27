@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.AbstractModel;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -11,80 +12,60 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService {
+public class UserService extends AbstractService {
     private UserStorage userStorage;
 
     @Autowired
     public UserService(UserStorage userStorage) {
+        super(userStorage);
         this.userStorage = userStorage;
     }
 
-    public User createUser(User user) throws ValidationException {
-        validate(user);
-        return userStorage.createUser(user);
-    }
-
-    public User updateUser(User user) throws Exception {
-        validate(user);
-        return userStorage.updateUser(user);
-    }
-
-    public User deleteUser(Long id) throws Exception {
-        return userStorage.deleteUser(id);
-    }
-
-    public Collection<User> getAllUsers() {
-        return userStorage.getAllUsers();
-    }
-
-    public User getUser(Long id) throws Exception {
-        return userStorage.getUser(id);
-    }
-
-    public void validate (User user) throws ValidationException {
+    @Override
+    protected void validate(AbstractModel abstractModel) throws ValidationException {
+        User user = (User) abstractModel;
         if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            throw new  ValidationException ("Email введен не верно");
+            throw new ValidationException(user, "Email введен не верно", "email", user.getEmail());
         }
-        if(user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            throw new ValidationException("Введен не верный логин");
+        if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
+            throw new ValidationException(user, "Введен не верный логин", "login", user.getLogin());
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("Не верная дата рождения");
+            throw new ValidationException(user, "Не верная дата рождения", "birthday", user.getBirthday());
         }
 
     }
 
     public void addFriend(Long id, Long friendId) throws Exception {
-        User user = userStorage.getUser(id);
-        User friend = userStorage.getUser(friendId);
+        User user   = (User) userStorage.getById(id);
+        User friend = (User) userStorage.getById(friendId);
         user.getFriends().add(friend.getId());
-        userStorage.updateUser(user);
+        userStorage.update(user);
         friend.getFriends().add(user.getId());
-        userStorage.updateUser(friend);
+        userStorage.update(friend);
     }
 
     public void deleteFriend(Long id, Long friendId) throws Exception {
-        User user = userStorage.getUser(id);
-        User friend = userStorage.getUser(friendId);
-        if(user.getFriends().contains(friendId) && friend.getFriends().contains(id)) {
+        User user   = (User) userStorage.getById(id);
+        User friend = (User) userStorage.getById(friendId);
+        if (user.getFriends().contains(friendId) && friend.getFriends().contains(id)) {
             user.getFriends().remove(friendId);
             friend.getFriends().remove(id);
-            userStorage.updateUser(user);
-            userStorage.updateUser(friend);
-        }
-        else {
+            userStorage.update(user);
+            userStorage.update(friend);
+        } else {
             throw new ValidationException("Эти пользователи не состояли в друзьях");
         }
     }
 
     public Collection<Long> getFriendsForUser(Long id) throws Exception {
-        User user = userStorage.getUser(id);
+        User user = (User) userStorage.getById(id);
         return user.getFriends();
     }
 
     public Collection<Long> getCommonFriends(Long id, Long otherId) throws Exception {
-        User user = userStorage.getUser(id);
-        User otherUser = userStorage.getUser(otherId);
+        User user      = (User) userStorage.getById(id);
+        User otherUser = (User) userStorage.getById(otherId);
         return user.getFriends().stream()
                 .distinct()
                 .filter(otherUser.getFriends()::contains)

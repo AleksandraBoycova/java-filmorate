@@ -9,8 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-public class User {
-    private Long id;
+public class User extends AbstractModel{
     @Email
     private String email;
     @NotBlank

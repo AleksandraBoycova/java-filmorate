@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.yandex.practicum.filmorate.AbstractTest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.AbstractModel;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
@@ -32,16 +33,16 @@ class UserServiceTest extends AbstractTest {
     @Test
     void createUser() throws ValidationException {
         User user1 = buildUser("user1@mail.ru", "user1", "Anna", "13.10.1990");
-        when(storage.createUser(any())).thenReturn(user1);
-        User user = service.createUser(user1);
+        when(storage.create(any())).thenReturn(user1);
+        User user = (User) service.create(user1);
         assertEquals(user1, user);
     }
 
     @Test
     void updateUser() throws Exception {
         User user1 = buildUser("user1@mail.ru", "user1", "Anna", "13.10.1990");
-        when(storage.updateUser(any())).thenReturn(user1);
-        User user = service.updateUser(user1);
+        when(storage.update(any())).thenReturn(user1);
+        User user = (User) service.update(user1);
         assertEquals(user1, user);
     }
 
@@ -49,22 +50,22 @@ class UserServiceTest extends AbstractTest {
     void deleteUser() throws Exception {
         User user1 = buildUser("user1@mail.ru", "user1", "Anna", "13.10.1990");
         user1.setId(1L);
-        when(storage.deleteUser(any())).thenReturn(user1);
-        User user = service.deleteUser(1L);
+        when(storage.delete(any())).thenReturn(user1);
+        User user = (User) service.delete(1L);
         assertEquals(user1, user);
     }
 
     @Test
     void getAllUsers() {
-        when(storage.getAllUsers()).thenReturn(createUsers());
-        Collection<User> allUsers = service.getAllUsers();
+        when(storage.getAll()).thenReturn(createUsers());
+        Collection<AbstractModel> allUsers = service.getAll();
         assertEquals(6, allUsers.size());
     }
 
     @ParameterizedTest
     @MethodSource("prepareDataForCreateUser")
     void createUserWithError (User user, String expectedErrorMessage) {
-        assertThrows(ValidationException.class, ()->service.createUser(user), expectedErrorMessage);
+        assertThrows(ValidationException.class, ()->service.create(user), expectedErrorMessage);
     }
 
     @Test
@@ -75,11 +76,11 @@ class UserServiceTest extends AbstractTest {
         user2.setId(2L);
         user1.getFriends().add(2L);
         user2.getFriends().add(1L);
-        when(storage.getUser(any())).thenReturn(user1).thenReturn(user2);
-        when(storage.updateUser(any())).thenReturn(user1).thenReturn(user2);
+        when(storage.getById(any())).thenReturn(user1).thenReturn(user2);
+        when(storage.update(any())).thenReturn(user1).thenReturn(user2);
         service.addFriend(1L, 2L);
-        verify(storage, times(2)).getUser(any());
-        verify(storage, times(2)).updateUser(any());
+        verify(storage, times(2)).getById(any());
+        verify(storage, times(2)).update(any());
 
     }
 
@@ -91,11 +92,11 @@ class UserServiceTest extends AbstractTest {
         user2.setId(2L);
         user1.getFriends().add(2L);
         user2.getFriends().add(1L);
-        when(storage.getUser(any())).thenReturn(user1).thenReturn(user2);
-        when(storage.updateUser(any())).thenReturn(user1).thenReturn(user2);
+        when(storage.getById(any())).thenReturn(user1).thenReturn(user2);
+        when(storage.update(any())).thenReturn(user1).thenReturn(user2);
         service.deleteFriend(1L, 2L);
-        verify(storage, times(2)).getUser(any());
-        verify(storage, times(2)).updateUser(any());
+        verify(storage, times(2)).getById(any());
+        verify(storage, times(2)).update(any());
     }
 
     @Test
@@ -104,18 +105,18 @@ class UserServiceTest extends AbstractTest {
         User user2 = buildUser("user2@mail.ru", "user2", "Anton", "13.10.1968");
         user1.setId(1L);
         user2.setId(2L);
-        when(storage.getUser(any())).thenReturn(user1).thenReturn(user2);
-        when(storage.updateUser(any())).thenReturn(user1).thenReturn(user2);
+        when(storage.getById(any())).thenReturn(user1).thenReturn(user2);
+        when(storage.update(any())).thenReturn(user1).thenReturn(user2);
         assertThrows(ValidationException.class,()->service.deleteFriend(1L, 2L));
-        verify(storage, times(2)).getUser(any());
-        verify(storage, times(0)).updateUser(any());
+        verify(storage, times(2)).getById(any());
+        verify(storage, times(0)).update(any());
     }
 
     @Test
     void getFriendsForUser() throws Exception {
         User user1 = buildUser("user1@mail.ru", "user1", "Anna", "13.10.1990");
         user1.getFriends().addAll(Set.of(1L,2L));
-        when(storage.getUser(any())).thenReturn(user1);
+        when(storage.getById(any())).thenReturn(user1);
         Collection<Long> friendsForUser = service.getFriendsForUser(1L);
         assertEquals(2, friendsForUser.size());
         assertTrue(friendsForUser.containsAll(Set.of(1L,2L)));
@@ -134,7 +135,7 @@ class UserServiceTest extends AbstractTest {
         user3.getFriends().add(1L);
         user3.getFriends().add(2L);
 
-        when(storage.getUser(any())).thenReturn(user1).thenReturn(user3);
+        when(storage.getById(any())).thenReturn(user1).thenReturn(user3);
         Collection<Long> commonFriends = service.getCommonFriends(1L, 3L);
         assertEquals(1, commonFriends.size());
         assertTrue(commonFriends.contains(2L));
@@ -148,7 +149,7 @@ class UserServiceTest extends AbstractTest {
         );
     }
 
-    private List<User> createUsers () {
+    private List<AbstractModel> createUsers () {
         User user1 = buildUser("user1@mail.ru", "user1", "Anna", "13.10.1990");
         User user2 = buildUser("user2@mail.ru", "user2", "Anton", "13.10.1968");
         User user3 = buildUser("user3@mail.ru", "user3", "Gosha", "13.10.1994");

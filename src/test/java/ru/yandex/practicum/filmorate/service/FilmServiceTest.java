@@ -11,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.yandex.practicum.filmorate.AbstractTest;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.AbstractModel;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
@@ -37,8 +38,8 @@ class FilmServiceTest extends AbstractTest {
     void createFilm() throws ValidationException {
         Film film = buildFilm("Название фильма", "Описание фильма", "11.12.2020", 120);
         film.setId(12L);
-        when(storage.createFilm(any())).thenReturn(film);
-        Film createdFilm = filmService.createFilm(film);
+        when(storage.create(any())).thenReturn(film);
+        AbstractModel createdFilm = filmService.create(film);
         assertNotNull(createdFilm.getId());
         assertEquals(12L, createdFilm.getId());
     }
@@ -46,35 +47,35 @@ class FilmServiceTest extends AbstractTest {
     @ParameterizedTest
     @MethodSource("prepareDataForCreateFilm")
     void createFilmWithValidationError(Film film, String expectedErrorMessage) {
-        assertThrows(ValidationException.class, () -> filmService.createFilm(film), expectedErrorMessage);
-        verify(storage, times(0)).createFilm(any());
+        assertThrows(ValidationException.class, () -> filmService.create(film), expectedErrorMessage);
+        verify(storage, times(0)).create(any());
     }
 
     @ParameterizedTest
     @MethodSource("prepareDataForCreateFilm")
     void updateFilmWithValidationError(Film film, String expectedErrorMessage) throws Exception {
-        assertThrows(ValidationException.class, () -> filmService.createFilm(film), expectedErrorMessage);
-        verify(storage, times(0)).updateFilm(any());
+        assertThrows(ValidationException.class, () -> filmService.create(film), expectedErrorMessage);
+        verify(storage, times(0)).update(any());
     }
 
 
     @Test
     void updateFilm() throws Exception {
         Film updatedFilm = buildFilm("Название фильма", "новое описание", "11.12.2020", 120);
-        when(storage.updateFilm(any())).thenReturn(updatedFilm);
+        when(storage.update(any())).thenReturn(updatedFilm);
 
         Film film = buildFilm("Название фильма", "Описание фильма", "11.12.2020", 120);
         film.setDescription("новое описание");
 
-        Film updateFilm = filmService.updateFilm(film);
+        Film updateFilm = (Film) filmService.update(film);
         assertEquals("новое описание", updateFilm.getDescription());
     }
 
     @Test
     void getAllFilms() {
-        when(storage.getAllFilms()).thenReturn(buildFilmList());
+        when(storage.getAll()).thenReturn(buildFilmList());
 
-        Collection<Film> allFilms = filmService.getAllFilms();
+        Collection<AbstractModel> allFilms = filmService.getAll();
         assertEquals(6, allFilms.size());
 
     }
@@ -84,24 +85,24 @@ class FilmServiceTest extends AbstractTest {
         Film film = buildFilm("Название фильма", "Описание фильма", "11.12.2020", 120);
         film.setId(12L);
         film.getLikes().add(11L);
-        when(storage.getFilm(any())).thenReturn(film);
-        when(storage.updateFilm(any())).thenReturn(film);
+        when(storage.getById(any())).thenReturn(film);
+        when(storage.update(any())).thenReturn(film);
 
         filmService.likeFilm(12L, 11L);
 
-        verify(storage, times(1)).getFilm(12L);
-        verify(storage, times(1)).updateFilm(any());
+        verify(storage, times(1)).getById(12L);
+        verify(storage, times(1)).update(any());
         assertEquals(1, film.getLikes().size());
     }
 
     @Test
     void likeFilmWithError() throws Exception {
-        when(storage.getFilm(any())).thenThrow(FilmNotFoundException.class);
+        when(storage.getById(any())).thenThrow(FilmNotFoundException.class);
 
         assertThrows(FilmNotFoundException.class, () -> filmService.likeFilm(2L, 11L));
 
-        verify(storage, times(1)).getFilm(2L);
-        verify(storage, times(0)).updateFilm(any());
+        verify(storage, times(1)).getById(2L);
+        verify(storage, times(0)).update(any());
     }
 
     @Test
@@ -109,15 +110,15 @@ class FilmServiceTest extends AbstractTest {
         Film film = buildFilm("Название фильма", "Описание фильма", "11.12.2020", 120);
         film.setId(12L);
         film.getLikes().add(11L);
-        when(storage.getFilm(any())).thenReturn(film);
+        when(storage.getById(any())).thenReturn(film);
         Film film1 = buildFilm("Название фильма", "Описание фильма", "11.12.2020", 120);
         film1.setId(12L);
-        when(storage.updateFilm(any())).thenReturn(film1);
+        when(storage.update(any())).thenReturn(film1);
 
         filmService.dislikeFilm(12L, 11L);
 
-        verify(storage, times(1)).getFilm(12L);
-        verify(storage, times(1)).updateFilm(any());
+        verify(storage, times(1)).getById(12L);
+        verify(storage, times(1)).update(any());
         assertTrue(film.getLikes().isEmpty());
     }
 
@@ -126,17 +127,17 @@ class FilmServiceTest extends AbstractTest {
         Film film = buildFilm("Название фильма", "Описание фильма", "11.12.2020", 120);
         film.setId(12L);
         film.getLikes().add(11L);
-        when(storage.getFilm(any())).thenReturn(film);
+        when(storage.getById(any())).thenReturn(film);
 
         assertThrows(ValidationException.class, () -> filmService.dislikeFilm(12L, 1L), "Пользователь 1 не ставил лайк к фильму 12");
 
-        verify(storage, times(1)).getFilm(12L);
-        verify(storage, times(0)).updateFilm(any());
+        verify(storage, times(1)).getById(12L);
+        verify(storage, times(0)).update(any());
     }
 
     @Test
     void getMostPopularFilms() {
-        when(storage.getAllFilms()).thenReturn(buildFilmList());
+        when(storage.getAll()).thenReturn(buildFilmList());
 
         List<Film> mostPopularFilms = filmService.getMostPopularFilms(3);
         assertEquals(3, mostPopularFilms.size());
@@ -153,7 +154,7 @@ class FilmServiceTest extends AbstractTest {
         );
     }
 
-    private List<Film> buildFilmList() {
+    private List<AbstractModel> buildFilmList() {
         Film f1 = buildFilm("Морозко", "Сказка", "01.12.1980", 90);
         f1.setLikes(Set.of(1L, 2L, 3L, 4L, 5L));
         Film f2 = buildFilm("Снегурочка", "Сказка", "01.12.1981", 60);

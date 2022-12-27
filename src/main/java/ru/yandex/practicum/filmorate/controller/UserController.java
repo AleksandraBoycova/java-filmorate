@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.AbstractModel;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -17,38 +18,25 @@ import java.util.Collection;
 @RestController
 @Slf4j
 @RequestMapping("users")
-public class UserController extends AbstractController<User> {
+public class UserController extends AbstractController {
     private UserService userService;
 
     @Autowired
     public UserController(UserService userService) {
+        super(userService);
         this.userService = userService;
     }
 
     @PostMapping
-    public ResponseEntity<Object> createUser(@Valid @RequestBody User user)
+    public AbstractModel createUser(@Valid @RequestBody User user)
             throws ValidationException {
-        log.info("Создаем нового пользователя");
-        User createdUser = userService.createUser(user);
-        log.info("Создан пользователь {}", user.getName());
-        return new ResponseEntity<>(createdUser, HttpStatus.OK);
+        return super.create(user);
     }
 
     @PutMapping
-    public User updateUser(@Valid @RequestBody User user)
+    public AbstractModel updateUser(@Valid @RequestBody User user)
             throws Exception {
-        log.info("Редактируем пользователя");
-        userService.updateUser(user);
-            log.info("Пользователь {} изменен", user.getName());
-            return user;
-    }
-
-    @DeleteMapping("{id}")
-    public User deleteUser (@PathVariable Long id) throws Exception {
-        log.info("Удаляем пользователя {}", id);
-        User deleteUser = userService.deleteUser(id);
-        log.info("Пользователь {} удален", deleteUser.getName());
-        return deleteUser;
+        return super.update(user);
     }
 
     @PutMapping("/users/{id}/friends/{friendId}")

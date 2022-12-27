@@ -1,6 +1,9 @@
 package ru.yandex.practicum.filmorate.exception;
 
-public class FilmNotFoundException extends Exception {
+import lombok.Data;
+
+@Data
+public class FilmNotFoundException extends Exception implements ApiSubError {
     public FilmNotFoundException(String message) {
         super(message);
     }

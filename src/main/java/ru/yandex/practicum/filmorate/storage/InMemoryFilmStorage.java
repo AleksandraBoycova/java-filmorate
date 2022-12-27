@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.model.AbstractModel;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
@@ -10,18 +11,18 @@ import java.util.Map;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
-    private final Map<Long, Film> storage = new HashMap<>();
-    private static long counter = 1L;
+    private final Map<Long, AbstractModel> storage = new HashMap<>();
+    private static long                    counter = 1L;
 
     @Override
-    public Film createFilm(Film film) {
+    public AbstractModel create(AbstractModel film) {
         film.setId(counter++);
         storage.put(film.getId(), film);
         return film;
     }
 
     @Override
-    public Film updateFilm(Film film) throws Exception {
+    public AbstractModel update(AbstractModel film) throws Exception {
         Long id = film.getId();
         if (storage.containsKey(id)){
             storage.put(id, film);
@@ -33,9 +34,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film deleteFilm(Long id) throws Exception {
+    public AbstractModel delete(Long id) throws Exception {
         if (storage.containsKey(id)){
-            Film film = storage.get(id);
+            Film film = (Film) storage.get(id);
             storage.remove(id);
             return film;
         }
@@ -45,12 +46,12 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getAllFilms() {
+    public Collection<AbstractModel> getAll() {
         return storage.values();
     }
 
     @Override
-    public Film getFilm(Long id) throws Exception {
+    public AbstractModel getById(Long id) throws Exception {
         if (storage.containsKey(id)){
              return storage.get(id);
         }
