@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import ru.yandex.practicum.filmorate.AbstractTest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.AbstractModel;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
@@ -34,22 +33,22 @@ class InMemoryUserStorageTest extends AbstractTest {
 
     @Test
     void createUser() throws ValidationException {
-        AbstractModel user1 = storage.create(buildUser("email@mail.ru", "login", "name", "13.10.1990"));
+        User user1 = storage.create(buildUser("email@mail.ru", "login", "name", "13.10.1990"));
         assertNotNull(user1.getId());
     }
 
     @Test
     void updateUser() throws Exception {
         User user       = buildUser("email@mail.ru", "login", "name", "13.10.1990");
-        User createUser = (User) storage.create(user);
+        User createUser = storage.create(user);
         createUser.setLogin("new-login");
-        User updateUser = (User) storage.update(createUser);
+        User updateUser = storage.update(createUser);
         assertEquals("new-login", updateUser.getLogin());
     }
 
     @Test
     void getAllUsers() throws ValidationException {
-        Collection<AbstractModel> allUsers = storage.getAll();
+        Collection<User> allUsers = storage.getAll();
         assertEquals(3, allUsers.size());
     }
 }

@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.AbstractModel;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -14,7 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("films")
 @Slf4j
-public class FilmController extends AbstractController {
+public class FilmController extends AbstractController <Film>{
     private FilmService service;
 
     @Autowired
@@ -24,13 +23,13 @@ public class FilmController extends AbstractController {
     }
 
     @PostMapping
-    public AbstractModel createFilm(@Valid @RequestBody Film film)
+    public Film createFilm(@Valid @RequestBody Film film)
             throws ValidationException {
         return super.create(film);
     }
 
     @PutMapping
-    public AbstractModel updateFilm(@Valid @RequestBody Film film)
+    public Film updateFilm(@Valid @RequestBody Film film)
             throws Exception {
         return super.update(film);
     }

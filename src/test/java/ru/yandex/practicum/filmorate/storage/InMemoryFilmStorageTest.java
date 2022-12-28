@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.model.AbstractModel;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
@@ -26,7 +25,7 @@ class InMemoryFilmStorageTest {
     @BeforeEach
     void setUp() {
         Film film = buildFilm("Морозко", "Сказка", "01.12.1980", 90);
-        currentFilm = (Film) storage.create(film);
+        currentFilm = storage.create(film);
         storage.create(buildFilm("Снегурочка", "Сказка", "01.12.1981", 60));
         storage.create(buildFilm("Иван царевич и серый волк", "Сказка", "01.12.1985", 110));
         storage.create(buildFilm("Чебурашка", "Сказка", "01.12.1983", 30));
@@ -39,7 +38,7 @@ class InMemoryFilmStorageTest {
 
     @Test
     void deleteFilm() throws Exception {
-        AbstractModel deletedFilm = storage.delete(currentFilm.getId());
+        Film deletedFilm = storage.delete(currentFilm.getId());
         assertThrows(FilmNotFoundException.class, () -> storage.getById(deletedFilm.getId()), "Фильм с id " + deletedFilm.getId() + " не найден");
     }
 
@@ -50,7 +49,7 @@ class InMemoryFilmStorageTest {
 
     @Test
     void getFilm() throws Exception {
-        Film filmFromStorage = (Film) storage.getById(currentFilm.getId());
+        Film filmFromStorage = storage.getById(currentFilm.getId());
         assertEquals("Морозко", filmFromStorage.getName());
         assertEquals("Сказка", filmFromStorage.getDescription());
         assertEquals(getLocalDateFromString("01.12.1980"), filmFromStorage.getReleaseDate());
@@ -65,7 +64,7 @@ class InMemoryFilmStorageTest {
     @Test
     void createFilm() {
         Film          film        = buildFilm("Название фильма", "Описание фильма", "11.12.2020", 120);
-        AbstractModel createdFilm = storage.create(film);
+        Film createdFilm = storage.create(film);
         assertNotNull(createdFilm.getId());
     }
 
@@ -73,7 +72,7 @@ class InMemoryFilmStorageTest {
     void updateFilm() throws Exception {
         currentFilm.setDescription("Новогодняя сказка");
         Long idBeforeUpdate = currentFilm.getId();
-        Film updateFilm     = (Film) storage.update(currentFilm);
+        Film updateFilm     = storage.update(currentFilm);
 
         assertEquals("Новогодняя сказка", updateFilm.getDescription());
         assertEquals(idBeforeUpdate, currentFilm.getId());
@@ -89,7 +88,7 @@ class InMemoryFilmStorageTest {
 
     @Test
     void getAllFilms() {
-        Collection<AbstractModel> allFilms = storage.getAll();
+        Collection<Film> allFilms = storage.getAll();
         assertEquals(4, allFilms.size());
 
     }

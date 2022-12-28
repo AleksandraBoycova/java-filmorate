@@ -9,7 +9,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.yandex.practicum.filmorate.AbstractTest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.AbstractModel;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
@@ -43,7 +42,7 @@ class UserServiceTest extends AbstractTest {
     void updateUser() throws Exception {
         User user1 = buildUser("user1@mail.ru", "user1", "Anna", "13.10.1990");
         when(storage.update(any())).thenReturn(user1);
-        User user = (User) service.update(user1);
+        User user = service.update(user1);
         assertEquals(user1, user);
     }
 
@@ -52,14 +51,14 @@ class UserServiceTest extends AbstractTest {
         User user1 = buildUser("user1@mail.ru", "user1", "Anna", "13.10.1990");
         user1.setId(1L);
         when(storage.delete(any())).thenReturn(user1);
-        User user = (User) service.delete(1L);
+        User user = service.delete(1L);
         assertEquals(user1, user);
     }
 
     @Test
     void getAllUsers() {
         when(storage.getAll()).thenReturn(createUsers());
-        Collection<AbstractModel> allUsers = service.getAll();
+        Collection<User> allUsers = service.getAll();
         assertEquals(6, allUsers.size());
     }
 
@@ -123,9 +122,9 @@ class UserServiceTest extends AbstractTest {
         user2.setId(2L);
         when(storage.getById(any())).thenReturn(user3);
         when(storage.getAll()).thenReturn(List.of(user1, user2));
-        Collection<AbstractModel> friendsForUser = service.getFriendsForUser(1L);
+        Collection<User> friendsForUser = service.getFriendsForUser(1L);
         assertEquals(2, friendsForUser.size());
-        assertTrue(friendsForUser.stream().map(User.class::cast).map(User::getId).collect(Collectors.toList()).containsAll(Set.of(1L,2L)));
+        assertTrue(friendsForUser.stream().map(User::getId).collect(Collectors.toList()).containsAll(Set.of(1L,2L)));
     }
 
     @Test
@@ -145,9 +144,9 @@ class UserServiceTest extends AbstractTest {
 
         when(storage.getById(any())).thenReturn(user1).thenReturn(user3);
         when(storage.getAll()).thenReturn(List.of(user1, user2, user3));
-        Collection<AbstractModel> commonFriends = service.getCommonFriends(1L, 3L);
+        Collection<User> commonFriends = service.getCommonFriends(1L, 3L);
         assertEquals(1, commonFriends.size());
-        assertTrue(commonFriends.stream().map(User.class::cast).map(User::getId).collect(Collectors.toList()).contains(2L));
+        assertTrue(commonFriends.stream().map(User::getId).collect(Collectors.toList()).contains(2L));
     }
 
     public static Stream<Arguments> prepareDataForCreateUser() {
@@ -158,7 +157,7 @@ class UserServiceTest extends AbstractTest {
         );
     }
 
-    private List<AbstractModel> createUsers () {
+    private List<User> createUsers () {
         User user1 = buildUser("user1@mail.ru", "user1", "Anna", "13.10.1990");
         User user2 = buildUser("user2@mail.ru", "user2", "Anton", "13.10.1968");
         User user3 = buildUser("user3@mail.ru", "user3", "Gosha", "13.10.1994");

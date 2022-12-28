@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.AbstractTest;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.AbstractModel;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
@@ -40,7 +39,7 @@ class FilmServiceTest extends AbstractTest {
         Film film = buildFilm("Название фильма", "Описание фильма", "11.12.2020", 120);
         film.setId(12L);
         when(storage.create(any())).thenReturn(film);
-        AbstractModel createdFilm = filmService.create(film);
+        Film createdFilm = filmService.create(film);
         assertNotNull(createdFilm.getId());
         assertEquals(12L, createdFilm.getId());
     }
@@ -68,7 +67,7 @@ class FilmServiceTest extends AbstractTest {
         Film film = buildFilm("Название фильма", "Описание фильма", "11.12.2020", 120);
         film.setDescription("новое описание");
 
-        Film updateFilm = (Film) filmService.update(film);
+        Film updateFilm = filmService.update(film);
         assertEquals("новое описание", updateFilm.getDescription());
     }
 
@@ -76,7 +75,7 @@ class FilmServiceTest extends AbstractTest {
     void getAllFilms() {
         when(storage.getAll()).thenReturn(buildFilmList());
 
-        Collection<AbstractModel> allFilms = filmService.getAll();
+        Collection<Film> allFilms = filmService.getAll();
         assertEquals(6, allFilms.size());
 
     }
@@ -155,7 +154,7 @@ class FilmServiceTest extends AbstractTest {
         );
     }
 
-    private List<AbstractModel> buildFilmList() {
+    private List<Film> buildFilmList() {
         Film f1 = buildFilm("Морозко", "Сказка", "01.12.1980", 90);
         f1.setLikes(Set.of(1L, 2L, 3L, 4L, 5L));
         Film f2 = buildFilm("Снегурочка", "Сказка", "01.12.1981", 60);

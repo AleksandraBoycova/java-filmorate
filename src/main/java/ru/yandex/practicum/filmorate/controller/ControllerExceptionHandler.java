@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,22 +16,26 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import java.util.List;
 
 @ControllerAdvice
+@Slf4j
 public class ControllerExceptionHandler {
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ApplicationError> handleValidationException(ValidationException e) {
         ApplicationError applicationError = new ApplicationError(HttpStatus.BAD_REQUEST, e);
+       log.error("Validation Exception Thrown");
         return new ResponseEntity<>(applicationError, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({FilmNotFoundException.class, UserNotFoundException.class})
     public ResponseEntity<ApplicationError> handleNotFoundException(Exception e) {
         ApplicationError applicationError = new ApplicationError(HttpStatus.NOT_FOUND, "Объект не найден", e);
+        log.error("Not found exception thrown");
         return new ResponseEntity<>(applicationError, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler()
     public ResponseEntity<ApplicationError> handleException(Exception e) {
         ApplicationError applicationError = new ApplicationError(HttpStatus.INTERNAL_SERVER_ERROR, "Произошла ошибка", e);
+        log.error("Unexpected exception thrown");
         return new ResponseEntity<>(applicationError, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -46,6 +51,7 @@ public class ControllerExceptionHandler {
         ApplicationError applicationError = new ApplicationError(HttpStatus.BAD_REQUEST, "Ошибка валидации. " + errorMessage, e);
         MethodParameter  parameter        = e.getParameter();
         parameter.getAnnotatedElement();
+        log.error("Method Argument Not Valid Exception");
         return new ResponseEntity<>(applicationError, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
