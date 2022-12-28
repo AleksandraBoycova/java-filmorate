@@ -9,7 +9,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-public class Film extends AbstractModel{
+public class Film {
+    private Long id;
     @NotBlank
     private String name;
     @NotNull

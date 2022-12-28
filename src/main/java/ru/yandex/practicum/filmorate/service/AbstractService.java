@@ -15,14 +15,14 @@ public abstract class AbstractService <T>{
         this.storage = storage;
     }
 
-    public T create(T film) throws ValidationException {
-        validate(film);
-        return storage.create(film);
+    public T create(T t) throws ValidationException {
+        validate(t);
+        return storage.create(t);
     }
 
-    public T update(T film) throws Exception {
-        validate(film);
-        return storage.update(film);
+    public T update(T t) throws Exception {
+        validate(t);
+        return storage.update(t);
     }
 
     public T delete(Long id) throws Exception {
