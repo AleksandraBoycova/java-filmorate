@@ -3,6 +3,7 @@ Template repository for Filmorate project.
 
 # Проект базы данных для приложения 
 ![](https://github.com/AleksandraBoycova/java-filmorate/blob/database-project/QuickDBD-export.png)
+
 В таблице **Film** хранятся данные о фильмах. 
 
 Таблица **User** хранит информацию о пользователях. Поля *Email* и *Login* уникальны.
