@@ -46,7 +46,7 @@ public class UserDbStorageImpl implements UserDbStorage {
 
     @Override
     public User update(User user) throws Exception {
-        String updateStatement = "UPDATE \"user\" SET ";//login=?, email=?, birthday=?
+        String updateStatement = "UPDATE \"user\" SET ";
         String condition = "WHERE id=?";
         if(user.getId() == null) {
             throw new UserNotFoundException("User not found");
