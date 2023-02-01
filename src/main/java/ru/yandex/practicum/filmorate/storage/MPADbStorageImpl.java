@@ -14,6 +14,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class MPADbStorageImpl implements MPADbStorage{
 
@@ -76,10 +77,13 @@ public class MPADbStorageImpl implements MPADbStorage{
 
     @Override
     public MPA delete(Long id) throws Exception {
-        MPA mpa = getById(id);
+        Optional<MPA> mpa = getById(id);
+        if (mpa.isEmpty()) {
+            throw new RuntimeException();
+        }
         String deleteStatement = "DELETE FROM mpa WHERE id=?";
         jdbcTemplate.update(deleteStatement, id);
-        return mpa;
+        return mpa.get();
     }
 
     @Override
@@ -90,12 +94,12 @@ public class MPADbStorageImpl implements MPADbStorage{
     }
 
     @Override
-    public MPA getById(Long id) throws Exception {
+    public Optional<MPA> getById(Long id) throws Exception {
         String selectStatement = "SELECT name, description FROM MPA WHERE id=?";
         MPA mpa = jdbcTemplate.queryForObject(selectStatement, new Object[]{id}, new MPARowMapper());
         if (mpa == null) {
-            throw new FilmNotFoundException("MPA not found");
+            return Optional.empty();
         }
-        return mpa;
+        return Optional.of(mpa);
     }
 }

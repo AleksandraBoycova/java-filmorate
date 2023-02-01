@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import com.fasterxml.jackson.datatype.jdk8.OptionalDoubleSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -15,6 +16,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class FilmDbStorageImpl implements FilmDbStorage{
 
@@ -37,8 +39,8 @@ public class FilmDbStorageImpl implements FilmDbStorage{
             ps.setString(2, film.getDescription());
             ps.setDate(3, Date.valueOf(film.getReleaseDate()));
             ps.setInt(4, film.getDuration());
-            ps.setString(5, film.getGenre());
-            ps.setString(6, film.getMpa());
+            ps.setLong(5, film.getGenre().getId());
+            ps.setLong(6, film.getMpa().getId());
             return ps;
         }, keyHolder);
         if (keyHolder.getKey() != null) {
@@ -84,8 +86,8 @@ public class FilmDbStorageImpl implements FilmDbStorage{
             ps.setString(2, film.getDescription());
             ps.setDate(3, Date.valueOf(film.getReleaseDate()));
             ps.setInt(4, film.getDuration());
-            ps.setString(5, film.getGenre());
-            ps.setString(6, film.getMpa());
+            ps.setLong(5, film.getGenre().getId());
+            ps.setLong(6, film.getMpa().getId());
             return ps;
         });
         if (update == 0) {
@@ -98,10 +100,14 @@ public class FilmDbStorageImpl implements FilmDbStorage{
 
     @Override
     public Film delete(Long id) throws Exception {
-        Film film = getById(id);
+        Optional<Film> film = getById(id);
+        if (film.isEmpty()) {
+            throw new FilmNotFoundException("Film not found");
+        }
         String deleteStatement = "DELETE FROM films WHERE id=?";
         jdbcTemplate.update(deleteStatement, id);
-        return film;
+        return film.get();
+
     }
 
     @Override
@@ -112,12 +118,12 @@ public class FilmDbStorageImpl implements FilmDbStorage{
     }
 
     @Override
-    public Film getById(Long id) throws Exception {
+    public Optional<Film> getById(Long id) throws Exception {
         String selectStatement = "SELECT name, description, release_date, duration, genre_id, mpa_id FROM films WHERE id=?";
         Film film = jdbcTemplate.queryForObject(selectStatement, new Object[]{id}, new FilmRowMapper());
         if (film == null) {
-            throw new FilmNotFoundException("Film not found");
+            return Optional.empty();
         }
-        return film;
+        return Optional.of(film);
     }
 }

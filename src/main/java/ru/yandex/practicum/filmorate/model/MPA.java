@@ -5,6 +5,15 @@ public class MPA {
     private String name;
     private String description;
 
+    public MPA(Long id, String name, String description) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+    }
+
+    public MPA() {
+    }
+
     public Long getId() {
         return id;
     }

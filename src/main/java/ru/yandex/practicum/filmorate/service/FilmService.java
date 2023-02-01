@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,16 +25,22 @@ public class FilmService extends AbstractService <Film>{
     }
 
     public void likeFilm(Long filmId, Long userId) throws Exception {
-        Film filmFromStorage = storage.getById(filmId);
-        filmFromStorage.getLikes().add(userId);
-        storage.update(filmFromStorage);
+        Optional<Film> filmFromStorage = storage.getById(filmId);
+        if (filmFromStorage.isEmpty()) {
+            throw new FilmNotFoundException("Film not found");
+        }
+        filmFromStorage.get().getLikes().add(userId);
+        storage.update(filmFromStorage.get());
     }
 
     public void dislikeFilm(Long filmId, Long userId) throws Exception {
-        Film filmFromStorage = storage.getById(filmId);
-        if (filmFromStorage.getLikes().contains(userId)) {
-            filmFromStorage.getLikes().remove(userId);
-            storage.update(filmFromStorage);
+        Optional<Film> filmFromStorage = storage.getById(filmId);
+        if (filmFromStorage.isEmpty()) {
+            throw new FilmNotFoundException("Film not found");
+        }
+        if (filmFromStorage.get().getLikes().contains(userId)) {
+            filmFromStorage.get().getLikes().remove(userId);
+            storage.update(filmFromStorage.get());
         } else {
             throw new UserNotFoundException("Пользователь " + userId + " не ставил лайк к фильму " + filmId);
         }

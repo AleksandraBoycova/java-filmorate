@@ -14,6 +14,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class GenreDbStorageImpl implements GenreDbStorage{
 
@@ -70,10 +71,13 @@ public class GenreDbStorageImpl implements GenreDbStorage{
 
     @Override
     public Genre delete(Long id) throws Exception {
-        Genre genre = getById(id);
+        Optional<Genre> genre = getById(id);
+        if (genre.isEmpty()) {
+            throw new RuntimeException();
+        }
         String deleteStatement = "DELETE FROM genre WHERE id=?";
         jdbcTemplate.update(deleteStatement, id);
-        return genre;
+        return genre.get();
     }
 
     @Override
@@ -84,12 +88,12 @@ public class GenreDbStorageImpl implements GenreDbStorage{
     }
 
     @Override
-    public Genre getById(Long id) throws Exception {
+    public Optional<Genre> getById(Long id) throws Exception {
         String selectStatement = "SELECT name, description FROM genre WHERE id=?";
         Genre genre = jdbcTemplate.queryForObject(selectStatement, new Object[]{id}, new GenreRowMapper());
         if (genre == null) {
-            throw new FilmNotFoundException("Genre not found");
+            return Optional.empty();
         }
-        return genre;
+        return Optional.of(genre);
     }
 }

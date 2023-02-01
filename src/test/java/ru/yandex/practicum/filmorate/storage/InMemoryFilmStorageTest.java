@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -49,11 +50,12 @@ class InMemoryFilmStorageTest {
 
     @Test
     void getFilm() throws Exception {
-        Film filmFromStorage = storage.getById(currentFilm.getId());
-        assertEquals("Морозко", filmFromStorage.getName());
-        assertEquals("Сказка", filmFromStorage.getDescription());
-        assertEquals(getLocalDateFromString("01.12.1980"), filmFromStorage.getReleaseDate());
-        assertEquals(90, filmFromStorage.getDuration());
+        Optional<Film> filmFromStorage = storage.getById(currentFilm.getId());
+        assertTrue(filmFromStorage.isPresent());
+        assertEquals("Морозко", filmFromStorage.get().getName());
+        assertEquals("Сказка", filmFromStorage.get().getDescription());
+        assertEquals(getLocalDateFromString("01.12.1980"), filmFromStorage.get().getReleaseDate());
+        assertEquals(90, filmFromStorage.get().getDuration());
     }
 
     @Test

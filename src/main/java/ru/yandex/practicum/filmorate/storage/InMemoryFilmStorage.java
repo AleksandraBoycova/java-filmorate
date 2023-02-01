@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage{
@@ -50,13 +51,8 @@ public class InMemoryFilmStorage implements FilmStorage{
     }
 
     @Override
-    public Film getById(Long id) throws Exception {
-        if (storage.containsKey(id)){
-             return storage.get(id);
-        }
-        else {
-            throw new FilmNotFoundException("Фильм с id " + id +" не найден");
-        }
+    public Optional<Film> getById(Long id) throws Exception {
+        return Optional.of(storage.get(id));
     }
 
     public void clearStorage(){

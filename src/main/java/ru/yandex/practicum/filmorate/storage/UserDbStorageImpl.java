@@ -13,6 +13,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class UserDbStorageImpl implements UserDbStorage {
 
@@ -84,10 +85,13 @@ public class UserDbStorageImpl implements UserDbStorage {
 
     @Override
     public User delete(Long id) throws Exception {
-        User u = getById(id);
+        Optional<User> u = getById(id);
+        if (u.isEmpty()) {
+            throw new UserNotFoundException("User not found");
+        }
         String deleteStatement = "DELETE FROM \"user\" WHERE id=?";
         jdbcTemplate.update(deleteStatement, id);
-        return u;
+        return u.get();
     }
 
     @Override
@@ -98,12 +102,12 @@ public class UserDbStorageImpl implements UserDbStorage {
     }
 
     @Override
-    public User getById(Long id) throws Exception {
+    public Optional<User> getById(Long id) throws Exception {
         String selectStatement = "SELECT id, user_name, login, email, birthday FROM \"user\" WHERE id=?";
         User user = jdbcTemplate.queryForObject(selectStatement, new Object[]{id}, new UserRowMapper());
         if (user == null) {
-            throw new UserNotFoundException("User not found");
+            return Optional.empty();
         }
-        return user;
+        return Optional.of(user);
     }
 }

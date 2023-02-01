@@ -17,6 +17,7 @@ import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -85,7 +86,7 @@ class FilmServiceTest extends AbstractTest {
         Film film = buildFilm("Название фильма", "Описание фильма", "11.12.2020", 120);
         film.setId(12L);
         film.getLikes().add(11L);
-        when(storage.getById(any())).thenReturn(film);
+        when(storage.getById(any())).thenReturn(Optional.of(film));
         when(storage.update(any())).thenReturn(film);
 
         filmService.likeFilm(12L, 11L);
@@ -110,7 +111,7 @@ class FilmServiceTest extends AbstractTest {
         Film film = buildFilm("Название фильма", "Описание фильма", "11.12.2020", 120);
         film.setId(12L);
         film.getLikes().add(11L);
-        when(storage.getById(any())).thenReturn(film);
+        when(storage.getById(any())).thenReturn(Optional.of(film));
         Film film1 = buildFilm("Название фильма", "Описание фильма", "11.12.2020", 120);
         film1.setId(12L);
         when(storage.update(any())).thenReturn(film1);
@@ -127,7 +128,7 @@ class FilmServiceTest extends AbstractTest {
         Film film = buildFilm("Название фильма", "Описание фильма", "11.12.2020", 120);
         film.setId(12L);
         film.getLikes().add(11L);
-        when(storage.getById(any())).thenReturn(film);
+        when(storage.getById(any())).thenReturn(Optional.of(film));
 
         assertThrows(UserNotFoundException.class, () -> filmService.dislikeFilm(12L, 1L), "Пользователь 1 не ставил лайк к фильму 12");
 

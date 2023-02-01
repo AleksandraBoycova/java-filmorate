@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class InMemoryUserStorage implements UserStorage{
@@ -51,14 +52,10 @@ public class InMemoryUserStorage implements UserStorage{
     }
 
     @Override
-    public User getById(Long id) throws Exception {
-        if (storage.containsKey(id)){
-            return storage.get(id);
-        }
-        else {
-            throw new FilmNotFoundException("Пользователь с id " + id +" не найден");
-        }
+    public Optional<User> getById(Long id) throws Exception {
+    return Optional.of(storage.get(id));
     }
+
 
     public void clearStorage(){
         storage.clear();

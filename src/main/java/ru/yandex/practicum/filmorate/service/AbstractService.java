@@ -5,6 +5,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.storage.Storage;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public abstract class AbstractService <T>{
 
@@ -34,7 +35,11 @@ public abstract class AbstractService <T>{
     }
 
     public T getById(Long id) throws Exception {
-        return storage.getById(id);
+        Optional<T> optionalT = storage.getById(id);
+        if (optionalT.isEmpty()) {
+            throw new RuntimeException();
+        }
+        return optionalT.get();
     }
 
     protected abstract void validate(T model) throws ValidationException;

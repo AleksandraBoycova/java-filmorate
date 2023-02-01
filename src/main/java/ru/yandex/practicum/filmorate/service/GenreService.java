@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.Storage;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @Service
 public class GenreService extends AbstractService <Genre> {
@@ -40,6 +41,10 @@ public class GenreService extends AbstractService <Genre> {
     }
 
     public Genre getById(Long id) throws Exception {
-        return storage.getById(id);
+        Optional<Genre> optionalGenre = storage.getById(id);
+        if (optionalGenre.isEmpty()) {
+            throw new RuntimeException();
+        }
+        return optionalGenre.get();
     }
 }
