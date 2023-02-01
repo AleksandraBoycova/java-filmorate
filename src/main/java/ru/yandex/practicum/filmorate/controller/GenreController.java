@@ -5,10 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.AbstractService;
 import ru.yandex.practicum.filmorate.service.GenreService;
-import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 
@@ -18,10 +15,6 @@ import javax.validation.Valid;
 @RequestMapping("genres")
 public class GenreController extends AbstractController <Genre> {
     private GenreService genreService;
-
-    public GenreController(AbstractService<Genre> service) {
-        super(service);
-    }
 
     @Autowired
     public GenreController(GenreService genreService) {

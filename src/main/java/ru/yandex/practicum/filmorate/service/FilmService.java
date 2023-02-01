@@ -1,11 +1,13 @@
 package ru.yandex.practicum.filmorate.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -18,8 +20,8 @@ import java.util.stream.Collectors;
 public class FilmService extends AbstractService <Film>{
    private final DateTimeFormatter formatter;
 
-
-    public FilmService(InMemoryFilmStorage storage) {
+    @Autowired
+    public FilmService(@Qualifier("dbFilmStorage") FilmStorage storage) {
         super(storage);
         formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     }

@@ -5,14 +5,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Profile;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.GenreDbStorage;
-import ru.yandex.practicum.filmorate.storage.MPADbStorage;
-import ru.yandex.practicum.filmorate.storage.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.impl.DbFilmStorage;
+import ru.yandex.practicum.filmorate.storage.impl.DbGenreStorage;
+import ru.yandex.practicum.filmorate.storage.impl.DbMPAStorage;
+import ru.yandex.practicum.filmorate.storage.impl.DbUserStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -26,11 +27,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Profile("test")
 public class FilmorateApplicationTests {
-    private final UserDbStorage userStorage;
-    private final FilmDbStorage filmStorage;
-    private final GenreDbStorage genreStorage;
-    private final MPADbStorage mpaStorage;
+    private final DbUserStorage userStorage;
+    private final DbFilmStorage filmStorage;
+    private final DbGenreStorage genreStorage;
+    private final DbMPAStorage mpaStorage;
 
     @Test
     void contextLoads() { }
@@ -96,7 +98,7 @@ public class FilmorateApplicationTests {
         film.setReleaseDate(LocalDate.now());
         film.setDuration(120);
         film.setGenre(new Genre(1L, "comedy"));
-        film.setMpa(new MPA(1L,"G", "у фильма нет возрастных ограничений"));
+        //film.setMpa(new MPA(1L,"G", "у фильма нет возрастных ограничений"));
     }
 
     @Test
@@ -115,7 +117,7 @@ public class FilmorateApplicationTests {
         film.setReleaseDate(releaseDate);
         film.setDuration(duration);
         film.setGenre(new Genre(1L,"comedy"));
-        film.setMpa(new MPA(1L,"G", "у фильма нет возрастных ограничений"));
+        //film.setMpa(new MPA(1L,"G", "у фильма нет возрастных ограничений"));
         return film;
     }
 

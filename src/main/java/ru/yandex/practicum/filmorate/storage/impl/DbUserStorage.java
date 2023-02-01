@@ -1,37 +1,39 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.util.UserRowMapper;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
-public class UserDbStorageImpl implements UserDbStorage {
+@Component
+public class DbUserStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
     @Autowired
-    public UserDbStorageImpl(JdbcTemplate jdbcTemplate) {
+    public DbUserStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     public User create(User user) {
-        String sqlQuery = "insert into users(email, login, name, birthday) " +
+        String sqlQuery = "insert into users(email, login, user_name, birthday) " +
                 "values (?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection
-                    .prepareStatement(sqlQuery);
+                    .prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getLogin());
             ps.setString(3, user.getName());
@@ -49,20 +51,22 @@ public class UserDbStorageImpl implements UserDbStorage {
     public User update(User user) throws Exception {
         String updateStatement = "UPDATE \"user\" SET ";
         String condition = "WHERE id=?";
+        String delimiter = "";
         if(user.getId() == null) {
             throw new UserNotFoundException("User not found");
         }
         if (user.getName() != null) {
             updateStatement += "user_name=?";
         }
+        delimiter = ", ";
         if (user.getLogin() != null) {
-            updateStatement += "login=?";
+            updateStatement += delimiter + "login=?";
         }
         if (user.getEmail() != null) {
-            updateStatement += "email=?";
+            updateStatement += delimiter + "email=?";
         }
         if (user.getBirthday() != null) {
-            updateStatement += "birthday=?";
+            updateStatement += delimiter + "birthday=?";
         }
         updateStatement += condition;
         String finalUpdateStatement = updateStatement;
@@ -77,9 +81,7 @@ public class UserDbStorageImpl implements UserDbStorage {
         });
         if (update == 0) {
             throw new RuntimeException();
-
         }
-
         return null;
     }
 
@@ -97,14 +99,13 @@ public class UserDbStorageImpl implements UserDbStorage {
     @Override
     public Collection<User> getAll() {
         String selectStatement = "SELECT id, user_name, login, email, birthday FROM \"user\"";
-        List<User> users = jdbcTemplate.queryForList(selectStatement, User.class);
-        return users;
+        return jdbcTemplate.queryForList(selectStatement, User.class);
     }
 
     @Override
     public Optional<User> getById(Long id) throws Exception {
         String selectStatement = "SELECT id, user_name, login, email, birthday FROM \"user\" WHERE id=?";
-        User user = jdbcTemplate.queryForObject(selectStatement, new Object[]{id}, new UserRowMapper());
+        User user = jdbcTemplate.queryForObject(selectStatement, new UserRowMapper(), id);
         if (user == null) {
             return Optional.empty();
         }

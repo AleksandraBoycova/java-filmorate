@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -18,7 +19,7 @@ public class UserService extends AbstractService <User>{
     private UserStorage userStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("dbUserStorage") UserStorage userStorage) {
         super(userStorage);
         this.userStorage = userStorage;
     }
@@ -52,8 +53,6 @@ public class UserService extends AbstractService <User>{
         }
         user.get().getFriends().add(friend.get().getId());
         userStorage.update(user.get());
-        friend.get().getFriends().add(user.get().getId());
-        userStorage.update(friend.get());
     }
 
     public void deleteFriend(Long id, Long friendId) throws Exception {
@@ -67,9 +66,7 @@ public class UserService extends AbstractService <User>{
         }
         if (user.get().getFriends().contains(friendId) && friend.get().getFriends().contains(id)) {
             user.get().getFriends().remove(friendId);
-            friend.get().getFriends().remove(id);
             userStorage.update(user.get());
-            userStorage.update(friend.get());
         } else {
             throw new ValidationException("Эти пользователи не состояли в друзьях");
         }

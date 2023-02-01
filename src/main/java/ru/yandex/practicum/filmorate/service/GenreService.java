@@ -1,10 +1,10 @@
 package ru.yandex.practicum.filmorate.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.Storage;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -13,7 +13,8 @@ import java.util.Optional;
 public class GenreService extends AbstractService <Genre> {
     private GenreStorage genreStorage;
 
-    public GenreService(Storage<Genre> storage) {
+    @Autowired
+    public GenreService(GenreStorage storage) {
         super(storage);
     }
 
@@ -23,12 +24,10 @@ public class GenreService extends AbstractService <Genre> {
     }
 
     public Genre create(Genre genre) throws ValidationException {
-        validate(genre);
         return storage.create(genre);
     }
 
     public Genre update(Genre genre) throws Exception {
-        validate(genre);
         return storage.update(genre);
     }
 

@@ -1,38 +1,38 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.util.FilmRowMapper;
+import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import ru.yandex.practicum.filmorate.util.GenreRowMapper;
 
-import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
-public class GenreDbStorageImpl implements GenreDbStorage{
+@Component
+public class DbGenreStorage implements GenreStorage {
 
     private final JdbcTemplate jdbcTemplate;
     @Autowired
-    public GenreDbStorageImpl(JdbcTemplate jdbcTemplate) {
+    public DbGenreStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     public Genre create(Genre genre) {
-        String sqlQuery = "insert into genre(name) " +
+        String sqlQuery = "insert into genre(genre_name) " +
                 "values (?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection
-                    .prepareStatement(sqlQuery);
+                    .prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, genre.getName());
             return ps;
         }, keyHolder);
@@ -52,7 +52,7 @@ public class GenreDbStorageImpl implements GenreDbStorage{
         }
 
         if (genre.getName() != null) {
-            updateStatement += "film_name=?";
+            updateStatement += "genre_name=?";
         }
 
         updateStatement += condition;
@@ -82,15 +82,14 @@ public class GenreDbStorageImpl implements GenreDbStorage{
 
     @Override
     public Collection<Genre> getAll() {
-        String selectStatement = "SELECT name FROM genre";
-        List<Genre> genres = jdbcTemplate.queryForList(selectStatement, Genre.class);
-        return genres;
+        String selectStatement = "SELECT genre_name FROM genre";
+        return jdbcTemplate.queryForList(selectStatement, Genre.class);
     }
 
     @Override
     public Optional<Genre> getById(Long id) throws Exception {
-        String selectStatement = "SELECT name, description FROM genre WHERE id=?";
-        Genre genre = jdbcTemplate.queryForObject(selectStatement, new Object[]{id}, new GenreRowMapper());
+        String selectStatement = "SELECT genre_name FROM genre WHERE id=?";
+        Genre genre = jdbcTemplate.queryForObject(selectStatement, new GenreRowMapper(), id);
         if (genre == null) {
             return Optional.empty();
         }

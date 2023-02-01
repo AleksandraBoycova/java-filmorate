@@ -1,38 +1,38 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.MPA;
-import ru.yandex.practicum.filmorate.util.FilmRowMapper;
+import ru.yandex.practicum.filmorate.storage.MpaStorage;
 import ru.yandex.practicum.filmorate.util.MPARowMapper;
 
-import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
-public class MPADbStorageImpl implements MPADbStorage{
+@Component
+public class DbMPAStorage implements MpaStorage {
 
     private final JdbcTemplate jdbcTemplate;
     @Autowired
-    public MPADbStorageImpl(JdbcTemplate jdbcTemplate) {
+    public DbMPAStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     public MPA create(MPA mpa) {
-        String sqlQuery = "insert into MPA(name, description) " +
+        String sqlQuery = "insert into MPA(mpa_name, description) " +
                 "values (?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection
-                    .prepareStatement(sqlQuery);
+                    .prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, mpa.getName());
             ps.setString(2, mpa.getDescription());
             return ps;
@@ -56,7 +56,7 @@ public class MPADbStorageImpl implements MPADbStorage{
             updateStatement += "mpa_name=?";
         }
         if (mpa.getDescription() != null) {
-            updateStatement += "description=?";
+            updateStatement += ", description=?";
         }
         updateStatement += condition;
         String finalUpdateStatement = updateStatement;
@@ -69,9 +69,7 @@ public class MPADbStorageImpl implements MPADbStorage{
         });
         if (update == 0) {
             throw new RuntimeException();
-
         }
-
         return null;
     }
 
@@ -88,15 +86,14 @@ public class MPADbStorageImpl implements MPADbStorage{
 
     @Override
     public Collection<MPA> getAll() {
-        String selectStatement = "SELECT name, description FROM MPA";
-        List<MPA> mpas = jdbcTemplate.queryForList(selectStatement, MPA.class);
-        return mpas;
+        String selectStatement = "SELECT mpa_name, description FROM MPA";
+        return jdbcTemplate.queryForList(selectStatement, MPA.class);
     }
 
     @Override
     public Optional<MPA> getById(Long id) throws Exception {
-        String selectStatement = "SELECT name, description FROM MPA WHERE id=?";
-        MPA mpa = jdbcTemplate.queryForObject(selectStatement, new Object[]{id}, new MPARowMapper());
+        String selectStatement = "SELECT mpa_name, description FROM MPA WHERE id=?";
+        MPA mpa = jdbcTemplate.queryForObject(selectStatement, new MPARowMapper(), id);
         if (mpa == null) {
             return Optional.empty();
         }
