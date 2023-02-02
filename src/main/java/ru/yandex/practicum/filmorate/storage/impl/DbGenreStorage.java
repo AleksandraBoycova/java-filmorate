@@ -45,28 +45,13 @@ public class DbGenreStorage implements GenreStorage {
 
     @Override
     public Genre update(Genre genre) throws Exception {
-        String updateStatement = "UPDATE genre SET ";
-        String condition = "WHERE id=?";
+        String updateStatement = "UPDATE genre SET genre_name=? WHERE genre_id=?";
         if(genre.getId() == null) {
             throw new FilmNotFoundException("Genre not found");
         }
+        jdbcTemplate.update(updateStatement, genre.getName(), genre.getId());
 
-        if (genre.getName() != null) {
-            updateStatement += "genre_name=?";
-        }
-
-        updateStatement += condition;
-        String finalUpdateStatement = updateStatement;
-        int update = jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection
-                    .prepareStatement(finalUpdateStatement);
-            ps.setString(1, genre.getName());
-            return ps;
-        });
-        if (update == 0) {
-            throw new RuntimeException();
-        }
-        return null;
+        return getById(genre.getId()).orElse(null);
     }
 
     @Override
@@ -75,20 +60,20 @@ public class DbGenreStorage implements GenreStorage {
         if (genre.isEmpty()) {
             throw new RuntimeException();
         }
-        String deleteStatement = "DELETE FROM genre WHERE id=?";
+        String deleteStatement = "DELETE FROM genre WHERE genre_id=?";
         jdbcTemplate.update(deleteStatement, id);
         return genre.get();
     }
 
     @Override
     public Collection<Genre> getAll() {
-        String selectStatement = "SELECT genre_name FROM genre";
-        return jdbcTemplate.queryForList(selectStatement, Genre.class);
+        String selectStatement = "SELECT * FROM genre";
+        return jdbcTemplate.query(selectStatement, new GenreRowMapper());
     }
 
     @Override
     public Optional<Genre> getById(Long id) throws Exception {
-        String selectStatement = "SELECT genre_name FROM genre WHERE id=?";
+        String selectStatement = "SELECT * FROM genre WHERE genre_id=?";
         Genre genre = jdbcTemplate.queryForObject(selectStatement, new GenreRowMapper(), id);
         if (genre == null) {
             return Optional.empty();

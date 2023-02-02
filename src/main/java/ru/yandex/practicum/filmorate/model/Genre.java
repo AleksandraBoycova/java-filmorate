@@ -1,5 +1,8 @@
 package ru.yandex.practicum.filmorate.model;
 
+import lombok.EqualsAndHashCode;
+
+@EqualsAndHashCode
 public class Genre {
     private Long id;
     private String name;
@@ -10,9 +13,6 @@ public class Genre {
     }
 
     public Genre() {
-    }
-
-    public void setId(long id) {
     }
 
     public Long getId() {

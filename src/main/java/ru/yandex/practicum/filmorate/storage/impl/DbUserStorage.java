@@ -8,13 +8,13 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.util.FriendshipStatus;
 import ru.yandex.practicum.filmorate.util.UserRowMapper;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.Collection;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 public class DbUserStorage implements UserStorage {
@@ -27,7 +27,7 @@ public class DbUserStorage implements UserStorage {
 
     @Override
     public User create(User user) {
-        String sqlQuery = "insert into users(email, login, user_name, birthday) " +
+        String sqlQuery = "insert into \"user\"(email, login, user_name, birthday) " +
                 "values (?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -42,6 +42,7 @@ public class DbUserStorage implements UserStorage {
         }, keyHolder);
         if (keyHolder.getKey() != null) {
             user.setId(keyHolder.getKey().longValue());
+            user.getFriends().forEach(friendId -> updateFriendship(user.getId(), friendId));
             return user;
         }
         return null;
@@ -49,40 +50,38 @@ public class DbUserStorage implements UserStorage {
 
     @Override
     public User update(User user) throws Exception {
-        String updateStatement = "UPDATE \"user\" SET ";
-        String condition = "WHERE id=?";
-        String delimiter = "";
-        if(user.getId() == null) {
+        if (user.getId() == null) {
             throw new UserNotFoundException("User not found");
         }
+        String updateStatement = "UPDATE \"user\" SET ";
+        String condition       = "WHERE user_id=?";
+        String delimiter       = "";
+
+        List<Object> args = new ArrayList<>();
         if (user.getName() != null) {
             updateStatement += "user_name=?";
+            args.add(user.getName());
         }
         delimiter = ", ";
         if (user.getLogin() != null) {
             updateStatement += delimiter + "login=?";
+            args.add(user.getLogin());
         }
         if (user.getEmail() != null) {
             updateStatement += delimiter + "email=?";
+            args.add(user.getEmail());
         }
         if (user.getBirthday() != null) {
             updateStatement += delimiter + "birthday=?";
+            args.add(Date.valueOf(user.getBirthday()));
         }
         updateStatement += condition;
+        args.add(user.getId());
         String finalUpdateStatement = updateStatement;
-        int update = jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection
-                    .prepareStatement(finalUpdateStatement);
-            ps.setString(1, user.getEmail());
-            ps.setString(2, user.getLogin());
-            ps.setString(3, user.getName());
-            ps.setDate(4, Date.valueOf(user.getBirthday()));
-            return ps;
-        });
-        if (update == 0) {
-            throw new RuntimeException();
-        }
-        return null;
+        jdbcTemplate.update(finalUpdateStatement, args.toArray());
+        user.getFriends().forEach(friendId -> updateFriendship(user.getId(), friendId));
+
+        return getById(user.getId()).orElse(null);
     }
 
     @Override
@@ -91,24 +90,34 @@ public class DbUserStorage implements UserStorage {
         if (u.isEmpty()) {
             throw new UserNotFoundException("User not found");
         }
-        String deleteStatement = "DELETE FROM \"user\" WHERE id=?";
+        String deleteStatement = "DELETE FROM \"user\" WHERE user_id=?";
         jdbcTemplate.update(deleteStatement, id);
         return u.get();
     }
 
     @Override
     public Collection<User> getAll() {
-        String selectStatement = "SELECT id, user_name, login, email, birthday FROM \"user\"";
-        return jdbcTemplate.queryForList(selectStatement, User.class);
+        String selectStatement = "SELECT * FROM \"user\"";
+        return jdbcTemplate.query(selectStatement,  new UserRowMapper());
     }
 
     @Override
     public Optional<User> getById(Long id) throws Exception {
-        String selectStatement = "SELECT id, user_name, login, email, birthday FROM \"user\" WHERE id=?";
+        String selectStatement = "SELECT * FROM \"user\" WHERE user_id=?";
         User user = jdbcTemplate.queryForObject(selectStatement, new UserRowMapper(), id);
         if (user == null) {
             return Optional.empty();
         }
+        user.setFriends(new HashSet<>(jdbcTemplate.queryForList("SELECT friend_id FROM friendship WHERE user_id=?", Long.class, id)));
         return Optional.of(user);
+    }
+
+    private void updateFriendship(Long userId, Long friendId) {
+        String createFriendshipEntry = "INSERT INTO friendship (user_id, friend_id, friendship_status) VALUES (?, ?, ?)";
+        jdbcTemplate.update(createFriendshipEntry, userId, friendId, FriendshipStatus.NOT_ACCEPTED.name());
+        String updateStatement = "UPDATE friendship SET friendship_status=? WHERE (user_id=? AND friend_id=? AND EXISTS (SELECT 1 FROM friendship WHERE user_id=? and friend_id=?);" +
+                "UPDATE friendship SET friendship_status=? WHERE user_id=? AND friend_id=? AND (SELECT friendship_status FROM friendship WHERE user_id=? AND friend_id=?) = ?;";
+        jdbcTemplate.update(updateStatement, FriendshipStatus.ACCEPTED.name(), userId, friendId, friendId, userId,
+                FriendshipStatus.ACCEPTED.name(), friendId, userId, userId, friendId, FriendshipStatus.ACCEPTED.name());
     }
 }

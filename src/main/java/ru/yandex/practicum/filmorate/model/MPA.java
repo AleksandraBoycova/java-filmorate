@@ -1,5 +1,8 @@
 package ru.yandex.practicum.filmorate.model;
 
+import lombok.EqualsAndHashCode;
+
+@EqualsAndHashCode
 public class MPA {
     private Long id;
     private String name;

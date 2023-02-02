@@ -12,7 +12,9 @@ import ru.yandex.practicum.filmorate.util.MPARowMapper;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -46,31 +48,26 @@ public class DbMPAStorage implements MpaStorage {
 
     @Override
     public MPA update(MPA mpa) throws Exception {
-        String updateStatement = "UPDATE MPA SET ";
-        String condition = "WHERE id=?";
         if(mpa.getId() == null) {
             throw new FilmNotFoundException("MPA not found");
         }
+        String updateStatement = "UPDATE MPA SET ";
+        String condition = "WHERE mpa_id=?";
+        List<Object> args = new ArrayList<>();
 
         if (mpa.getName() != null) {
             updateStatement += "mpa_name=?";
+            args.add(mpa.getName());
         }
         if (mpa.getDescription() != null) {
             updateStatement += ", description=?";
+            args.add(mpa.getDescription());
         }
         updateStatement += condition;
+        args.add(mpa.getId());
         String finalUpdateStatement = updateStatement;
-        int update = jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection
-                    .prepareStatement(finalUpdateStatement);
-            ps.setString(1, mpa.getName());
-            ps.setString(2, mpa.getDescription());
-            return ps;
-        });
-        if (update == 0) {
-            throw new RuntimeException();
-        }
-        return null;
+        jdbcTemplate.update(updateStatement, args.toArray());
+        return getById(mpa.getId()).orElse(null);
     }
 
     @Override
@@ -79,20 +76,20 @@ public class DbMPAStorage implements MpaStorage {
         if (mpa.isEmpty()) {
             throw new RuntimeException();
         }
-        String deleteStatement = "DELETE FROM mpa WHERE id=?";
+        String deleteStatement = "DELETE FROM mpa WHERE mpa_id=?";
         jdbcTemplate.update(deleteStatement, id);
         return mpa.get();
     }
 
     @Override
     public Collection<MPA> getAll() {
-        String selectStatement = "SELECT mpa_name, description FROM MPA";
-        return jdbcTemplate.queryForList(selectStatement, MPA.class);
+        String selectStatement = "SELECT * FROM MPA";
+        return jdbcTemplate.query(selectStatement, new MPARowMapper());
     }
 
     @Override
     public Optional<MPA> getById(Long id) throws Exception {
-        String selectStatement = "SELECT mpa_name, description FROM MPA WHERE id=?";
+        String selectStatement = "SELECT * FROM MPA WHERE mpa_id=?";
         MPA mpa = jdbcTemplate.queryForObject(selectStatement, new MPARowMapper(), id);
         if (mpa == null) {
             return Optional.empty();

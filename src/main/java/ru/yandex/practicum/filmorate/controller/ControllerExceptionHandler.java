@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -13,6 +14,7 @@ import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 
+import java.sql.SQLException;
 import java.util.List;
 
 @ControllerAdvice
@@ -52,6 +54,15 @@ public class ControllerExceptionHandler {
         MethodParameter  parameter        = e.getParameter();
         parameter.getAnnotatedElement();
         log.error("Method Argument Not Valid Exception");
+        return new ResponseEntity<>(applicationError, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler()
+    public ResponseEntity<ApplicationError> handleBadSqlGrammarException(BadSqlGrammarException e) {
+        StringBuilder    errorMessage = new StringBuilder();
+        SQLException sqlException = e.getSQLException();
+        ApplicationError applicationError = new ApplicationError(HttpStatus.BAD_REQUEST, "Ошибка базы данных.", sqlException);
+        log.error("Bad Sql Grammar Exception Exception");
         return new ResponseEntity<>(applicationError, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

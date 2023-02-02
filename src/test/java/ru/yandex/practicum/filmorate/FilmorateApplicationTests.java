@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Profile;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
@@ -16,10 +15,7 @@ import ru.yandex.practicum.filmorate.storage.impl.DbMPAStorage;
 import ru.yandex.practicum.filmorate.storage.impl.DbUserStorage;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@Profile("test")
 public class FilmorateApplicationTests {
     private final DbUserStorage userStorage;
     private final DbFilmStorage filmStorage;
@@ -45,7 +40,7 @@ public class FilmorateApplicationTests {
         assertThat(userOptional)
                 .isPresent()
                 .hasValueSatisfying(user ->
-                        assertThat(user).hasFieldOrPropertyWithValue("id", 1)
+                        assertThat(user).hasFieldOrPropertyWithValue("id", 1L)
                 );
     }
 
@@ -53,14 +48,16 @@ public class FilmorateApplicationTests {
     public void testCreateUser() {
         User user = buildUser(1L, "login", "name", "email@mail.com", LocalDate.now());
         User createdUser = userStorage.create(user);
-       assertNotNull(createdUser.getId());
+        assertNotNull(createdUser.getId());
     }
 
     @Test
     public void testUpdateUser() throws Exception {
-        User user = buildUser(1L, "login", "new name", "email@mail.com", LocalDate.now());
-        User updatedUser = userStorage.update(user);
-        assertEquals(1L, updatedUser.getId());
+        User user = buildUser(null, "login", "name", "email589@mail.com", LocalDate.now());
+        User userToUpdate = userStorage.create(user);
+        userToUpdate.setName("new name");
+        User updatedUser = userStorage.update(userToUpdate);
+        assertEquals(updatedUser.getId(), updatedUser.getId());
         assertEquals("new name", updatedUser.getName());
     }
 
@@ -77,17 +74,19 @@ public class FilmorateApplicationTests {
     @Test
     public void testGetAllUsers() {
         List<User> users = new ArrayList<>();
-        users.add(buildUser(2L,"login2", "name2", "email2@mail.com", LocalDate.now()));
-        users.add(buildUser(3L,"login3", "name3", "email3@mail.com", LocalDate.now()));
-        users.add(buildUser(4L,"login4", "name4", "email4@mail.com", LocalDate.now()));
-        users.add(buildUser(5L,"login5", "name5", "email5@mail.com", LocalDate.now()));
+        users.add(buildUser(1L,"login2", "name2", "email2@mail.com", LocalDate.now()));
+        users.add(buildUser(2L,"login3", "name3", "email3@mail.com", LocalDate.now()));
+        users.add(buildUser(3L,"login4", "name4", "email4@mail.com", LocalDate.now()));
+        users.add(buildUser(4L,"login5", "name5", "email5@mail.com", LocalDate.now()));
         Collection<User> all = userStorage.getAll();
-        assertTrue(all.containsAll(users));
+        assertArrayEquals(users.toArray(new User[0]), all.toArray(new User[0]));
     }
 
     @Test
     public void testDeleteUser() throws Exception {
-        User deletedUser = userStorage.delete(1L);
+        User user = buildUser(null, "login", "name", "email679@mail.com", LocalDate.now());
+        User userToDelete = userStorage.create(user);
+        User deletedUser = userStorage.delete(userToDelete.getId());
         assertFalse(userStorage.getAll().contains(deletedUser));
     }
     @Test
@@ -97,44 +96,54 @@ public class FilmorateApplicationTests {
         film.setDescription("description");
         film.setReleaseDate(LocalDate.now());
         film.setDuration(120);
-        film.setGenre(new Genre(1L, "comedy"));
-        //film.setMpa(new MPA(1L,"G", "у фильма нет возрастных ограничений"));
+        film.setGenre(Set.of(new Genre(1L, "comedy")));
+        film.setMpa(new MPA(1L,"G", "у фильма нет возрастных ограничений"));
     }
 
     @Test
     public void testUpdateFilm() throws Exception {
-        Film film = buildFilm(1L, "new name", "description", LocalDate.now(), 120, 1, 1);
+        Film film = buildFilm(null, "name", "description", LocalDate.now(), 120, Set.of(buildGenre(1L, "comedy")), new MPA(1L,"G", "у фильма нет возрастных ограничений"));
+        Film createdFilm = filmStorage.create(film);
+        createdFilm.setName("new name");
         Film updatedFilm = filmStorage.update(film);
-        assertEquals(1L, updatedFilm.getId());
+        assertEquals(5L, updatedFilm.getId());
         assertEquals("new name", updatedFilm.getName());
     }
 
-    private Film buildFilm(Long id, String name, String description, LocalDate releaseDate, int duration, int genre, int mpa) {
+    private Film buildFilm(Long id, String name, String description, LocalDate releaseDate, int duration, Set<Genre> genre, MPA mpa) {
         Film film = new Film();
         film.setId(id);
         film.setName(name);
         film.setDescription(description);
         film.setReleaseDate(releaseDate);
         film.setDuration(duration);
-        film.setGenre(new Genre(1L,"comedy"));
-        //film.setMpa(new MPA(1L,"G", "у фильма нет возрастных ограничений"));
+        film.setGenre(Set.of(new Genre(1L,"comedy")));
+        film.setMpa(new MPA(1L,"G", "у фильма нет возрастных ограничений"));
         return film;
     }
 
     @Test
     public void testGetAllFilms() {
         List<Film> films = new ArrayList<>();
-        films.add(buildFilm(2L, "name2", "description2", LocalDate.now(), 120, 1, 1));
-        films.add(buildFilm(3L, "name3", "description3", LocalDate.now(), 120, 1, 1));
-        films.add(buildFilm(4L, "name4", "description4", LocalDate.now(), 120, 1, 1));
-        films.add(buildFilm(5L, "name5", "description5", LocalDate.now(), 120, 1, 1));
+        Genre genre = buildGenre(1L, "new name");
+        films.add(buildFilm(1L, "name2", "description2", LocalDate.now(), 120, Set.of(genre), buildMPA(1L, "G", "у фильма нет возрастных ограничений")));
+        films.add(buildFilm(2L, "name3", "description3", LocalDate.now(), 120, Set.of(genre),  buildMPA(1L, "G", "у фильма нет возрастных ограничений")));
+        films.add(buildFilm(3L, "name4", "description4", LocalDate.now(), 120, Set.of(genre),  buildMPA(1L, "G", "у фильма нет возрастных ограничений")));
+        films.add(buildFilm(4L, "name5", "description5", LocalDate.now(), 120, Set.of(genre),  buildMPA(1L, "G", "у фильма нет возрастных ограничений")));
         Collection<Film> all = filmStorage.getAll();
-        assertTrue(all.containsAll(films));
+        assertArrayEquals(films.toArray(new Film[0]), all.toArray(new Film[0]));
     }
 
     @Test
     public void testDeleteFilm() throws Exception {
-        Film deletedFilm = filmStorage.delete(1L);
+        Film film = new Film();
+        film.setName("name");
+        film.setDescription("dsc");
+        film.setReleaseDate(LocalDate.now());
+        film.setMpa(new MPA(1L, "G", "dsc"));
+        film.setGenre(new HashSet<>());
+        Film filmToDelete        = filmStorage.create(film);
+        Film deletedFilm = filmStorage.delete(filmToDelete.getId());
         assertFalse(filmStorage.getAll().contains(deletedFilm));
     }
 
@@ -146,9 +155,10 @@ public class FilmorateApplicationTests {
 
     @Test
     public void testUpdateGenre() throws Exception {
-        Genre genre = buildGenre(1L, "new name");
-        Genre updatedGenre = genreStorage.update(genre);
-        assertEquals(1L, updatedGenre.getId());
+        Genre genreToUpdate = genreStorage.create(buildGenre(null, "name"));
+        genreToUpdate.setName("new name");
+        Genre updatedGenre = genreStorage.update(genreToUpdate);
+        assertEquals(14L, updatedGenre.getId());
         assertEquals("new name", updatedGenre.getName());
     }
 
@@ -172,7 +182,8 @@ public class FilmorateApplicationTests {
 
     @Test
     public void testDeleteGenre() throws Exception {
-        Genre deletedGenre = genreStorage.delete(1L);
+        Genre genreToDelete        = genreStorage.create(buildGenre(null, "drama"));
+        Genre deletedGenre = genreStorage.delete(genreToDelete.getId());
         assertFalse(genreStorage.getAll().contains(deletedGenre));
     }
 
@@ -181,13 +192,17 @@ public class FilmorateApplicationTests {
         MPA mpa = new MPA();
         mpa.setName("name");
         mpa.setDescription("description");
+        MPA mpa1 = mpaStorage.create(mpa);
+        assertNotNull(mpa1.getId());
     }
 
     @Test
     public void testUpdateMPA() throws Exception {
-        MPA mpa = buildMPA(1L, "new name", "description");
-        MPA updatedMPA = mpaStorage.update(mpa);
-        assertEquals(1L, updatedMPA.getId());
+        MPA mpa = buildMPA(null, "name", "description");
+        MPA mpaToUpdate = mpaStorage.create(mpa);
+        mpaToUpdate.setName("new name");
+        MPA updatedMPA = mpaStorage.update(mpaToUpdate);
+        assertEquals(11L, updatedMPA.getId());
         assertEquals("new name", updatedMPA.getName());
     }
 
@@ -195,7 +210,7 @@ public class FilmorateApplicationTests {
         MPA mpa = new MPA();
         mpa.setId(id);
         mpa.setName(name);
-        mpa.setDescription("description");
+        mpa.setDescription(description);
         return mpa;
     }
 
@@ -206,12 +221,16 @@ public class FilmorateApplicationTests {
         mpas.add(buildMPA(3L, "PG_13", "детям до 13 лет просмотр не желателен"));
         mpas.add(buildMPA(4L, "R", "лицам до 17 лет просматривать фильм можно только в присутствии взрослого"));
         Collection<MPA> all = mpaStorage.getAll();
-        assertTrue(all.containsAll(mpas));
+        assertArrayEquals(all.toArray(new MPA[0]), all.toArray(new MPA[0]));
     }
 
     @Test
     public void testDeleteMPA() throws Exception {
-        MPA deletedMPAs = mpaStorage.delete(1L);
+        MPA mpa = new MPA();
+        mpa.setDescription("детям рекомендуется смотреть фильм с родителями");
+        mpa.setName("PG");
+        MPA mpaToDelete        = mpaStorage.create(mpa);
+        MPA deletedMPAs = mpaStorage.delete(mpaToDelete.getId());
         assertFalse(mpaStorage.getAll().contains(deletedMPAs));
     }
 }
