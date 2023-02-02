@@ -16,7 +16,7 @@ import java.sql.*;
 import java.sql.Date;
 import java.util.*;
 
-@Component (value = "dbFilmStorage")
+@Component ("dbFilmStorage")
 public class DbFilmStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
