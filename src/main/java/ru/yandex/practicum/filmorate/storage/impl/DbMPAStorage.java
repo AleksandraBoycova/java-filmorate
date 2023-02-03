@@ -78,6 +78,8 @@ public class DbMPAStorage implements MpaStorage {
         }
         String deleteStatement = "DELETE FROM mpa WHERE mpa_id=?";
         jdbcTemplate.update(deleteStatement, id);
+        String s = "Update films set null where mpa_id = ?";
+        jdbcTemplate.update(deleteStatement, id);
         return mpa.get();
     }
 

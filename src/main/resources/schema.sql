@@ -1,13 +1,13 @@
 CREATE TABLE IF NOT EXISTS genre
 (
     genre_id long NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    genre_name varchar NOT NULL
+    genre_name varchar
 );
 
 CREATE TABLE IF NOT EXISTS mpa
 (
     mpa_id long NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    mpa_name varchar NOT NULL,
+    mpa_name varchar,
     description varchar
 );
 

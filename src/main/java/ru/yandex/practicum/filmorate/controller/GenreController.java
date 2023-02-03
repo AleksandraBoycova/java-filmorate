@@ -34,10 +34,5 @@ public class GenreController extends AbstractController <Genre> {
         return super.update(genre);
     }
 
-    @DeleteMapping ("/{id}/genres/{fgenreId}")
-    public void deleteGenre (@PathVariable Long id, @PathVariable Long genreId) throws Exception {
-        log.info("Удаляем жанр");
-        genreService.delete(genreId);
-    }
 
 }

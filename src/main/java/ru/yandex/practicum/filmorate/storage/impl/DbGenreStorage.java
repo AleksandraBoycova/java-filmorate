@@ -62,6 +62,8 @@ public class DbGenreStorage implements GenreStorage {
         }
         String deleteStatement = "DELETE FROM genre WHERE genre_id=?";
         jdbcTemplate.update(deleteStatement, id);
+        String s = "Delete from film_genre where genre_id = ?";
+        jdbcTemplate.update(deleteStatement, id);
         return genre.get();
     }
 

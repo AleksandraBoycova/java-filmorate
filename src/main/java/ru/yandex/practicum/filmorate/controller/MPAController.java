@@ -11,7 +11,7 @@ import javax.validation.Valid;
 
 @RestController
 @Slf4j
-@RequestMapping("MPA")
+@RequestMapping("mpa")
 public class MPAController extends AbstractController<MPA>{
     private MPAService mpaService;
 
@@ -32,12 +32,5 @@ public class MPAController extends AbstractController<MPA>{
             throws Exception {
         return super.update(mpa);
     }
-
-    @DeleteMapping ("/{id}/genres/{fgenreId}")
-    public void deleteMPA (@PathVariable Long id, @PathVariable Long mpaId) throws Exception {
-        log.info("Удаляем рейтинг");
-        mpaService.delete(mpaId);
-    }
-
 }
 
