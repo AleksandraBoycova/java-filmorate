@@ -1,9 +1,9 @@
-INSERT INTO genre(genre_name) VALUES ('comedy');
-	INSERT INTO genre(genre_name) VALUES ('drama');
-	INSERT INTO genre(genre_name) VALUES ('cartoon');
-	INSERT INTO genre(genre_name) VALUES ('thriller');
-	INSERT INTO genre(genre_name) VALUES ('documentary');
-	INSERT INTO genre(genre_name) VALUES ('action_movie');
+INSERT INTO genre(genre_name) VALUES ('Комедия');
+	INSERT INTO genre(genre_name) VALUES ('Драма');
+	INSERT INTO genre(genre_name) VALUES ('Мультфильм');
+	INSERT INTO genre(genre_name) VALUES ('Триллер');
+	INSERT INTO genre(genre_name) VALUES ('Документальный');
+	INSERT INTO genre(genre_name) VALUES ('Боевик');
 
 INSERT INTO MPA(mpa_name, description) VALUES ('G', 'у фильма нет возрастных ограничений');
     	INSERT INTO MPA(mpa_name, description) VALUES ('PG', 'детям рекомендуется смотреть фильм с родителями');

@@ -94,7 +94,9 @@ public class DbFilmStorage implements FilmStorage {
         args.add(film.getId());
         String finalUpdateStatement = updateStatement;
         jdbcTemplate.update(finalUpdateStatement, args.toArray());
-        updateFilmGenreTable(film.getId(), film.getGenre());
+        if (film.getGenre() != null) {
+
+        updateFilmGenreTable(film.getId(), film.getGenre());}
 
         return getById(film.getId()).orElse(null);
     }
