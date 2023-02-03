@@ -5,7 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
@@ -53,7 +53,7 @@ public class DbFilmStorage implements FilmStorage {
     @Override
     public Film update(Film film) throws Exception {
         if(film.getId() == null) {
-            throw new FilmNotFoundException("Film not found");
+            throw new NotFoundException("Film not found");
         }
         String updateStatement = "UPDATE films SET ";
         String condition = "WHERE film_id=?";
@@ -96,7 +96,7 @@ public class DbFilmStorage implements FilmStorage {
     public Film delete(Long id) throws Exception {
         Optional<Film> film = getById(id);
         if (film.isEmpty()) {
-            throw new FilmNotFoundException("Film not found");
+            throw new NotFoundException("Film not found");
         }
         String deleteStatement = "DELETE FROM films WHERE film_id=?";
         jdbcTemplate.update(deleteStatement, id);

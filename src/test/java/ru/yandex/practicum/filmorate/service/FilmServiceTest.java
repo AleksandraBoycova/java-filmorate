@@ -6,17 +6,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.yandex.practicum.filmorate.AbstractTest;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.impl.InMemoryFilmStorage;
 
 import java.util.Collection;
 import java.util.List;
@@ -101,9 +98,9 @@ class FilmServiceTest extends AbstractTest {
 
     @Test
     void likeFilmWithError() throws Exception {
-        when(storage.getById(any())).thenThrow(FilmNotFoundException.class);
+        when(storage.getById(any())).thenThrow(NotFoundException.class);
 
-        assertThrows(FilmNotFoundException.class, () -> filmService.likeFilm(2L, 11L));
+        assertThrows(NotFoundException.class, () -> filmService.likeFilm(2L, 11L));
 
         verify(storage, times(1)).getById(2L);
         verify(storage, times(0)).update(any());
@@ -133,7 +130,7 @@ class FilmServiceTest extends AbstractTest {
         film.getLikes().add(11L);
         when(storage.getById(any())).thenReturn(Optional.of(film));
 
-        assertThrows(UserNotFoundException.class, () -> filmService.dislikeFilm(12L, 1L), "Пользователь 1 не ставил лайк к фильму 12");
+        assertThrows(NotFoundException.class, () -> filmService.dislikeFilm(12L, 1L), "Пользователь 1 не ставил лайк к фильму 12");
 
         verify(storage, times(1)).getById(12L);
         verify(storage, times(0)).update(any());

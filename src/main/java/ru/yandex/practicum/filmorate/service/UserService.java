@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -45,11 +45,11 @@ public class UserService extends AbstractService <User>{
     public void addFriend(Long id, Long friendId) throws Exception {
         Optional<User> user = userStorage.getById(id);
         if (user.isEmpty()) {
-            throw new UserNotFoundException("User with id " + id + " not found");
+            throw new NotFoundException("User with id " + id + " not found");
         }
         Optional<User> friend = userStorage.getById(friendId);
         if (friend.isEmpty()) {
-            throw new UserNotFoundException("User with id " + friendId + " not found");
+            throw new NotFoundException("User with id " + friendId + " not found");
         }
         user.get().getFriends().add(friend.get().getId());
         userStorage.update(user.get());
@@ -58,11 +58,11 @@ public class UserService extends AbstractService <User>{
     public void deleteFriend(Long id, Long friendId) throws Exception {
         Optional<User> user = userStorage.getById(id);
         if (user.isEmpty()) {
-            throw new UserNotFoundException("User with id " + id + " not found");
+            throw new NotFoundException("User with id " + id + " not found");
         }
         Optional<User> friend = userStorage.getById(friendId);
         if (friend.isEmpty()) {
-            throw new UserNotFoundException("User with id " + friendId + " not found");
+            throw new NotFoundException("User with id " + friendId + " not found");
         }
         if (user.get().getFriends().contains(friendId) && friend.get().getFriends().contains(id)) {
             user.get().getFriends().remove(friendId);
@@ -75,7 +75,7 @@ public class UserService extends AbstractService <User>{
     public Collection<User> getFriendsForUser(Long id) throws Exception {
         Optional<User> user = userStorage.getById(id);
         if (user.isEmpty()) {
-            throw new UserNotFoundException("User not found");
+            throw new NotFoundException("User not found");
         }
         Set<Long> friends = user.get().getFriends();
          return userStorage.getAll().stream().filter(u->friends.contains(u.getId())).collect(Collectors.toList());
@@ -85,11 +85,11 @@ public class UserService extends AbstractService <User>{
     public Collection<User> getCommonFriends(Long id, Long otherId) throws Exception {
         Optional<User> user = userStorage.getById(id);
         if (user.isEmpty()) {
-            throw new UserNotFoundException("User with id " + id + " not found");
+            throw new NotFoundException("User with id " + id + " not found");
         }
         Optional<User> otherUser = userStorage.getById(otherId);
         if (otherUser.isEmpty()) {
-            throw new UserNotFoundException("User with id " + otherId + " not found");
+            throw new NotFoundException("User with id " + otherId + " not found");
         }
         Collection<Long> commonFriends = user.get().getFriends().stream()
                 .distinct()

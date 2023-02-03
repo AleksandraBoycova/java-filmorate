@@ -10,8 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.yandex.practicum.filmorate.exception.ApplicationError;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 
 import java.sql.SQLException;
@@ -27,8 +26,8 @@ public class ControllerExceptionHandler {
         return new ResponseEntity<>(applicationError, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({FilmNotFoundException.class, UserNotFoundException.class})
-    public ResponseEntity<ApplicationError> handleNotFoundException(Exception e) {
+    @ExceptionHandler( NotFoundException.class)
+    public ResponseEntity<ApplicationError> handleNotFoundException(NotFoundException e) {
         ApplicationError applicationError = new ApplicationError(HttpStatus.NOT_FOUND, "Объект не найден", e);
         log.error("Not found exception thrown");
         return new ResponseEntity<>(applicationError, HttpStatus.NOT_FOUND);

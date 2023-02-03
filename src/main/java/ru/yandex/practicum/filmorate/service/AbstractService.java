@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.storage.Storage;
 
@@ -37,7 +38,7 @@ public abstract class AbstractService <T>{
     public T getById(Long id) throws Exception {
         Optional<T> optionalT = storage.getById(id);
         if (optionalT.isEmpty()) {
-            throw new RuntimeException();
+            throw new NotFoundException("Object not found");
         }
         return optionalT.get();
     }

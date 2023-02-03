@@ -5,7 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.util.FriendshipStatus;
@@ -51,7 +51,7 @@ public class DbUserStorage implements UserStorage {
     @Override
     public User update(User user) throws Exception {
         if (user.getId() == null) {
-            throw new UserNotFoundException("User not found");
+            throw new NotFoundException("User not found");
         }
         String updateStatement = "UPDATE \"user\" SET ";
         String condition       = "WHERE user_id=?";
@@ -88,7 +88,7 @@ public class DbUserStorage implements UserStorage {
     public User delete(Long id) throws Exception {
         Optional<User> u = getById(id);
         if (u.isEmpty()) {
-            throw new UserNotFoundException("User not found");
+            throw new NotFoundException("User not found");
         }
         String deleteStatement = "DELETE FROM \"user\" WHERE user_id=?";
         jdbcTemplate.update(deleteStatement, id);

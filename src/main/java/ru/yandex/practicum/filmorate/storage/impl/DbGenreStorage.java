@@ -5,7 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import ru.yandex.practicum.filmorate.util.GenreRowMapper;
@@ -47,7 +47,7 @@ public class DbGenreStorage implements GenreStorage {
     public Genre update(Genre genre) throws Exception {
         String updateStatement = "UPDATE genre SET genre_name=? WHERE genre_id=?";
         if(genre.getId() == null) {
-            throw new FilmNotFoundException("Genre not found");
+            throw new NotFoundException("Genre not found");
         }
         jdbcTemplate.update(updateStatement, genre.getName(), genre.getId());
 
@@ -58,7 +58,7 @@ public class DbGenreStorage implements GenreStorage {
     public Genre delete(Long id) throws Exception {
         Optional<Genre> genre = getById(id);
         if (genre.isEmpty()) {
-            throw new RuntimeException();
+            throw new NotFoundException("Genre not found");
         }
         String deleteStatement = "DELETE FROM genre WHERE genre_id=?";
         jdbcTemplate.update(deleteStatement, id);

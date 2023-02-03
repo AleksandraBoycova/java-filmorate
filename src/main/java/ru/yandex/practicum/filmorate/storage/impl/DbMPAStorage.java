@@ -5,7 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.storage.MpaStorage;
 import ru.yandex.practicum.filmorate.util.MPARowMapper;
@@ -49,7 +49,7 @@ public class DbMPAStorage implements MpaStorage {
     @Override
     public MPA update(MPA mpa) throws Exception {
         if(mpa.getId() == null) {
-            throw new FilmNotFoundException("MPA not found");
+            throw new NotFoundException("MPA not found");
         }
         String updateStatement = "UPDATE MPA SET ";
         String condition = "WHERE mpa_id=?";
@@ -74,7 +74,7 @@ public class DbMPAStorage implements MpaStorage {
     public MPA delete(Long id) throws Exception {
         Optional<MPA> mpa = getById(id);
         if (mpa.isEmpty()) {
-            throw new RuntimeException();
+            throw new NotFoundException("MPA no found");
         }
         String deleteStatement = "DELETE FROM mpa WHERE mpa_id=?";
         jdbcTemplate.update(deleteStatement, id);

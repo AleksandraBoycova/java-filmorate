@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.impl.InMemoryFilmStorage;
 
@@ -46,7 +46,7 @@ class InMemoryFilmStorageTest {
 
     @Test
     void deleteFilmWithError() {
-        assertThrows(FilmNotFoundException.class, () -> storage.delete(Long.MAX_VALUE), "Фильм с id " + Long.MAX_VALUE + " не найден");
+        assertThrows(NotFoundException.class, () -> storage.delete(Long.MAX_VALUE), "Фильм с id " + Long.MAX_VALUE + " не найден");
     }
 
     @Test
@@ -86,7 +86,7 @@ class InMemoryFilmStorageTest {
         Film f = buildFilm("Снегурочка", "Сказка", "01.12.1981", 60);
         f.setId(Long.MAX_VALUE);
 
-        assertThrows(FilmNotFoundException.class, () -> storage.update(f), "Фильм с id " + Long.MAX_VALUE + " не найден");
+        assertThrows(NotFoundException.class, () -> storage.update(f), "Фильм с id " + Long.MAX_VALUE + " не найден");
     }
 
     @Test
