@@ -54,9 +54,13 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public Optional<User> getById(Long id) throws Exception {
-    return Optional.of(storage.get(id));
+        if (storage.get(id)
+                != null) {
+            return Optional.of(storage.get(id));
+        } else {
+            return Optional.empty();
+        }
     }
-
 
     public void clearStorage(){
         storage.clear();

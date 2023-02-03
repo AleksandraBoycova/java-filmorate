@@ -6,6 +6,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.yandex.practicum.filmorate.AbstractTest;
@@ -24,13 +25,13 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-
+@AutoConfigureTestDatabase
 @WebMvcTest({UserStorage.class, UserService.class})
 class UserServiceTest extends AbstractTest {
     @Autowired
     private UserService service;
 
-    @MockBean @Qualifier ("inMemoryUserStorage")
+    @MockBean (name = "dbUserStorage")
     private UserStorage storage;
 
 
@@ -38,7 +39,7 @@ class UserServiceTest extends AbstractTest {
     void createUser() throws ValidationException {
         User user1 = buildUser("user1@mail.ru", "user1", "Anna", "13.10.1990");
         when(storage.create(any())).thenReturn(user1);
-        User user = (User) service.create(user1);
+        User user = service.create(user1);
         assertEquals(user1, user);
     }
 
@@ -84,7 +85,7 @@ class UserServiceTest extends AbstractTest {
         when(storage.update(any())).thenReturn(user1).thenReturn(user2);
         service.addFriend(1L, 2L);
         verify(storage, times(2)).getById(any());
-        verify(storage, times(2)).update(any());
+        verify(storage, times(1)).update(any());
 
     }
 
@@ -100,7 +101,7 @@ class UserServiceTest extends AbstractTest {
         when(storage.update(any())).thenReturn(user1).thenReturn(user2);
         service.deleteFriend(1L, 2L);
         verify(storage, times(2)).getById(any());
-        verify(storage, times(2)).update(any());
+        verify(storage, times(1)).update(any());
     }
 
     @Test

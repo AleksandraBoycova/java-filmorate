@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.yandex.practicum.filmorate.AbstractTest;
@@ -27,13 +28,13 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-
+@AutoConfigureTestDatabase
 @WebMvcTest({FilmStorage.class, FilmService.class})
 class FilmServiceTest extends AbstractTest {
 
     @Autowired
     private FilmService         filmService;
-    @MockBean @Qualifier("inMemoryFilmStorage")
+    @MockBean(name = "dbFilmStorage")
     private FilmStorage storage;
 
 

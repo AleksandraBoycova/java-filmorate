@@ -53,7 +53,12 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Optional<Film> getById(Long id) throws Exception {
-        return Optional.of(storage.get(id));
+        Film filmFromStorage = storage.get(id);
+        if (filmFromStorage != null) {
+            return Optional.of(filmFromStorage);
+        } else {
+            return Optional.empty();
+        }
     }
 
     public void clearStorage(){

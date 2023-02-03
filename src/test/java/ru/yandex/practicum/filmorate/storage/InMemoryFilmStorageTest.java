@@ -41,7 +41,7 @@ class InMemoryFilmStorageTest {
     @Test
     void deleteFilm() throws Exception {
         Film deletedFilm = storage.delete(currentFilm.getId());
-        assertThrows(FilmNotFoundException.class, () -> storage.getById(deletedFilm.getId()), "Фильм с id " + deletedFilm.getId() + " не найден");
+        assertTrue(storage.getById(deletedFilm.getId()).isEmpty());
     }
 
     @Test
@@ -60,8 +60,8 @@ class InMemoryFilmStorageTest {
     }
 
     @Test
-    void getFilmWithError() {
-        assertThrows(FilmNotFoundException.class, () -> storage.getById(Long.MAX_VALUE), "Фильм с id " + Long.MAX_VALUE + " не найден");
+    void getFilmWithError() throws Exception {
+        assertTrue(storage.getById(Long.MAX_VALUE).isEmpty());
     }
 
     @Test

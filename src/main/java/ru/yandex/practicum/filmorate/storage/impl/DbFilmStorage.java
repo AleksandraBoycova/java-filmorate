@@ -12,8 +12,9 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.util.FilmRowMapper;
 import ru.yandex.practicum.filmorate.util.GenreRowMapper;
 
-import java.sql.*;
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.*;
 
 @Component ("dbFilmStorage")
