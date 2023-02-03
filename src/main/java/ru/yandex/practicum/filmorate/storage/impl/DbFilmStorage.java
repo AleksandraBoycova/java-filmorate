@@ -15,6 +15,7 @@ import ru.yandex.practicum.filmorate.util.GenreRowMapper;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.*;
 
 @Component("dbFilmStorage")
@@ -39,12 +40,18 @@ public class DbFilmStorage implements FilmStorage {
             ps.setString(2, film.getDescription());
             ps.setDate(3, Date.valueOf(film.getReleaseDate()));
             ps.setInt(4, film.getDuration());
-            ps.setLong(5, film.getMpa().getId());
+
+            if (film.getMpa() == null) {
+                ps.setNull(5, Types.BIGINT);
+            } else {
+                ps.setLong(5, film.getMpa().getId());
+            }
             return ps;
         }, keyHolder);
         if (keyHolder.getKey() != null) {
             film.setId(keyHolder.getKey().longValue());
-            updateFilmGenreTable(film.getId(), film.getGenre());
+            if (film.getGenre() != null) {
+            updateFilmGenreTable(film.getId(), film.getGenre());}
             return film;
         }
         return null;
