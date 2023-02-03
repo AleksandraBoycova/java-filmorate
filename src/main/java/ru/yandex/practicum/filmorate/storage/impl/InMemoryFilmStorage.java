@@ -61,6 +61,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
     }
 
+    @Override
+    public boolean isExists(Long id) {
+        return storage.containsKey(id);
+    }
+
     public void clearStorage(){
         storage.clear();
     }

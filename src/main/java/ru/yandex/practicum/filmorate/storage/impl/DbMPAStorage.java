@@ -48,7 +48,7 @@ public class DbMPAStorage implements MpaStorage {
 
     @Override
     public MPA update(MPA mpa) throws Exception {
-        if(mpa.getId() == null) {
+        if(mpa.getId() == null || !isExists(mpa.getId())) {
             throw new NotFoundException("MPA not found");
         }
         String updateStatement = "UPDATE MPA SET ";
@@ -91,11 +91,24 @@ public class DbMPAStorage implements MpaStorage {
 
     @Override
     public Optional<MPA> getById(Long id) throws Exception {
+        if (!isExists(id)) {
+            throw new NotFoundException("MPA not found");
+        }
         String selectStatement = "SELECT * FROM MPA WHERE mpa_id=?";
         MPA mpa = jdbcTemplate.queryForObject(selectStatement, new MPARowMapper(), id);
         if (mpa == null) {
             return Optional.empty();
         }
         return Optional.of(mpa);
+    }
+
+    public boolean isExists(Long id){
+        String  s      = "SELECT COUNT(*) FROM mpa WHERE mpa_id=?";
+        Long obj    = jdbcTemplate.queryForObject(s, Long.class, id);
+        if (obj != null) {
+            return obj != 0;
+        }else {
+            return false;
+        }
     }
 }

@@ -9,4 +9,5 @@ public interface Storage <T>{
     T delete(Long id) throws Exception;
     Collection<T> getAll ();
     Optional<T> getById(Long id) throws Exception;
+    boolean isExists(Long id);
 }

@@ -50,7 +50,7 @@ public class DbUserStorage implements UserStorage {
 
     @Override
     public User update(User user) throws Exception {
-        if (user.getId() == null) {
+        if (user.getId() == null || !isExists(user.getId())) {
             throw new NotFoundException("User not found");
         }
         String updateStatement = "UPDATE \"user\" SET ";
@@ -103,6 +103,9 @@ public class DbUserStorage implements UserStorage {
 
     @Override
     public Optional<User> getById(Long id) throws Exception {
+        if (!isExists(id)) {
+            throw new NotFoundException("User not found");
+        }
         String selectStatement = "SELECT * FROM \"user\" WHERE user_id=?";
         User user = jdbcTemplate.queryForObject(selectStatement, new UserRowMapper(), id);
         if (user == null) {
@@ -115,9 +118,19 @@ public class DbUserStorage implements UserStorage {
     private void updateFriendship(Long userId, Long friendId) {
         String createFriendshipEntry = "INSERT INTO friendship (user_id, friend_id, friendship_status) VALUES (?, ?, ?)";
         jdbcTemplate.update(createFriendshipEntry, userId, friendId, FriendshipStatus.NOT_ACCEPTED.name());
-        String updateStatement = "UPDATE friendship SET friendship_status=? WHERE (user_id=? AND friend_id=? AND EXISTS (SELECT 1 FROM friendship WHERE user_id=? and friend_id=?);" +
+        String updateStatement = "UPDATE friendship SET friendship_status=? WHERE user_id=? AND friend_id=? AND EXISTS (SELECT 1 FROM friendship WHERE user_id=? and friend_id=?);" +
                 "UPDATE friendship SET friendship_status=? WHERE user_id=? AND friend_id=? AND (SELECT friendship_status FROM friendship WHERE user_id=? AND friend_id=?) = ?;";
         jdbcTemplate.update(updateStatement, FriendshipStatus.ACCEPTED.name(), userId, friendId, friendId, userId,
                 FriendshipStatus.ACCEPTED.name(), friendId, userId, userId, friendId, FriendshipStatus.ACCEPTED.name());
+    }
+
+    public boolean isExists(Long id){
+        String  s      = "SELECT COUNT(*) FROM \"user\" WHERE user_id=?";
+        Long obj    = jdbcTemplate.queryForObject(s, Long.class, id);
+        if (obj != null) {
+            return obj != 0;
+        }else {
+            return false;
+        }
     }
 }

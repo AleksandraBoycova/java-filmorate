@@ -17,14 +17,14 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.*;
 
-@Component ("dbFilmStorage")
+@Component("dbFilmStorage")
 public class DbFilmStorage implements FilmStorage {
- @Autowired
-    private JdbcTemplate jdbcTemplate;
-    //@Autowired
-    //public DbFilmStorage(JdbcTemplate jdbcTemplate) {
-      //  this.jdbcTemplate = jdbcTemplate;
-    //}
+    private final JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    public DbFilmStorage(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     @Override
     public Film create(Film film) {
@@ -52,12 +52,12 @@ public class DbFilmStorage implements FilmStorage {
 
     @Override
     public Film update(Film film) throws Exception {
-        if(film.getId() == null) {
+        if (film.getId() == null || !isExists(film.getId())) {
             throw new NotFoundException("Film not found");
         }
         String updateStatement = "UPDATE films SET ";
-        String condition = "WHERE film_id=?";
-        String delimiter = "";
+        String condition       = "WHERE film_id=?";
+        String delimiter       = "";
 
         List<Object> args = new ArrayList<>();
 
@@ -70,7 +70,7 @@ public class DbFilmStorage implements FilmStorage {
             updateStatement += delimiter + "description=?";
             args.add(film.getDescription());
         }
-        if (film.getReleaseDate()!= null) {
+        if (film.getReleaseDate() != null) {
             updateStatement += delimiter + "release_date=?";
             args.add(film.getReleaseDate());
         }
@@ -94,6 +94,9 @@ public class DbFilmStorage implements FilmStorage {
 
     @Override
     public Film delete(Long id) throws Exception {
+        if (!isExists(id)) {
+            throw new NotFoundException("Film not found");
+        }
         Optional<Film> film = getById(id);
         if (film.isEmpty()) {
             throw new NotFoundException("Film not found");
@@ -106,21 +109,34 @@ public class DbFilmStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getAll() {
-        String selectStatement = "SELECT films.*, mpa.* FROM films join mpa on mpa.mpa_id = films.mpa_id";
-        List<Film> films       = jdbcTemplate.query(selectStatement, new FilmRowMapper());
+        String     selectStatement = "SELECT films.*, mpa.* FROM films join mpa on mpa.mpa_id = films.mpa_id";
+        List<Film> films           = jdbcTemplate.query(selectStatement, new FilmRowMapper());
         films.forEach(film -> film.setGenre(new HashSet<>(getGenreListForFilm(film.getId()))));
         return films;
     }
 
     @Override
     public Optional<Film> getById(Long id) throws Exception {
+        if (!isExists(id)) {
+            throw new NotFoundException("Film not found");
+        }
         String selectStatement = "SELECT films.*, mpa.* FROM films left join mpa on films.mpa_id = mpa.mpa_id WHERE film_id=?";
-        Film film = jdbcTemplate.queryForObject(selectStatement, new FilmRowMapper(), id);
+        Film   film            = jdbcTemplate.queryForObject(selectStatement, new FilmRowMapper(), id);
         if (film == null) {
             return Optional.empty();
         }
         film.setGenre(new HashSet<>(getGenreListForFilm(id)));
         return Optional.of(film);
+    }
+
+    public boolean isExists(Long id) {
+        String s   = "SELECT COUNT(*) FROM films WHERE film_id=?";
+        Long   obj = jdbcTemplate.queryForObject(s, Long.class, id);
+        if (obj != null) {
+            return obj != 0;
+        } else {
+            return false;
+        }
     }
 
     private List<Genre> getGenreListForFilm(Long id) {
@@ -129,11 +145,11 @@ public class DbFilmStorage implements FilmStorage {
         return query;
     }
 
-    private void updateFilmGenreTable(Long filmId, Set<Genre> genreSet){
+    private void updateFilmGenreTable(Long filmId, Set<Genre> genreSet) {
         String deleteStatement = "DELETE FROM film_genre WHERE film_id=?";
         jdbcTemplate.update(deleteStatement, filmId);
 
         String createFilmGenreEntry = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
-        genreSet.forEach(g-> jdbcTemplate.update(createFilmGenreEntry, filmId, g.getId()));
+        genreSet.forEach(g -> jdbcTemplate.update(createFilmGenreEntry, filmId, g.getId()));
     }
 }

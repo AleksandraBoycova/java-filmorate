@@ -45,6 +45,9 @@ public class DbGenreStorage implements GenreStorage {
 
     @Override
     public Genre update(Genre genre) throws Exception {
+        if (genre.getId() == null || !isExists(genre.getId())) {
+            throw new NotFoundException("genre not found");
+        }
         String updateStatement = "UPDATE genre SET genre_name=? WHERE genre_id=?";
         if(genre.getId() == null) {
             throw new NotFoundException("Genre not found");
@@ -75,11 +78,23 @@ public class DbGenreStorage implements GenreStorage {
 
     @Override
     public Optional<Genre> getById(Long id) throws Exception {
+        if (!isExists(id)) {
+            throw new NotFoundException("Genre not found");
+        }
         String selectStatement = "SELECT * FROM genre WHERE genre_id=?";
         Genre genre = jdbcTemplate.queryForObject(selectStatement, new GenreRowMapper(), id);
         if (genre == null) {
             return Optional.empty();
         }
         return Optional.of(genre);
+    }
+    public boolean isExists(Long id){
+        String  s      = "SELECT COUNT(*) FROM genre WHERE genre_id=?";
+        Long obj    = jdbcTemplate.queryForObject(s, Long.class, id);
+        if (obj != null) {
+            return obj != 0;
+        }else {
+            return false;
+        }
     }
 }
