@@ -12,7 +12,7 @@ public class MPARowMapper implements RowMapper<MPA> {
         MPA mpa = new MPA();
         mpa.setId(rs.getLong("MPA_ID"));
         mpa.setName(rs.getString("MPA_NAME"));
-        mpa.setDescription(rs.getString("DESCRIPTION"));
+        mpa.setDescription(rs.getString("MPA.DESCRIPTION"));
         return mpa;
     }
 }

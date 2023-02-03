@@ -16,7 +16,7 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.*;
 
-@Component (value = "dbUserStorage")
+@Component ("dbUserStorage")
 public class DbUserStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
