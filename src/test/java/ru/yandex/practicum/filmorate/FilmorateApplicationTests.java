@@ -96,13 +96,13 @@ public class FilmorateApplicationTests {
         film.setDescription("description");
         film.setReleaseDate(LocalDate.now());
         film.setDuration(120);
-        film.setGenre(Set.of(new Genre(1L, "comedy")));
+        film.setGenre(Set.of(new Genre(1L, "Комедия")));
         film.setMpa(new MPA(1L,"G", "у фильма нет возрастных ограничений"));
     }
 
     @Test
     public void testUpdateFilm() throws Exception {
-        Film film = buildFilm(null, "name", "description", LocalDate.now(), 120, Set.of(buildGenre(1L, "comedy")), new MPA(1L,"G", "у фильма нет возрастных ограничений"));
+        Film film = buildFilm(null, "name", "description", LocalDate.now(), 120, Set.of(buildGenre(1L, "Комедия")), new MPA(1L,"G", "у фильма нет возрастных ограничений"));
         Film createdFilm = filmStorage.create(film);
         createdFilm.setName("new name");
         Film updatedFilm = filmStorage.update(film);
@@ -117,7 +117,7 @@ public class FilmorateApplicationTests {
         film.setDescription(description);
         film.setReleaseDate(releaseDate);
         film.setDuration(duration);
-        film.setGenre(Set.of(new Genre(1L,"comedy")));
+        film.setGenre(Set.of(new Genre(1L,"Комедия")));
         film.setMpa(new MPA(1L,"G", "у фильма нет возрастных ограничений"));
         return film;
     }
@@ -172,10 +172,10 @@ public class FilmorateApplicationTests {
     @Test
     public void testGetAllGenres() {
         List<Genre> genres = new ArrayList<>();
-        genres.add(buildGenre(2L, "drama"));
-        genres.add(buildGenre(3L, "cartoon"));
-        genres.add(buildGenre(4L, "thriller"));
-        genres.add(buildGenre(5L, "documentary"));
+        genres.add(buildGenre(2L, "Драма"));
+        genres.add(buildGenre(3L, "Мультфильм"));
+        genres.add(buildGenre(4L, "Триллер"));
+        genres.add(buildGenre(5L, "Документальный"));
         Collection<Genre> all = genreStorage.getAll();
         assertTrue(all.containsAll(genres));
     }
