@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.yandex.practicum.filmorate.AbstractTest;
@@ -13,6 +14,7 @@ import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.impl.InMemoryFilmStorage;
 
 import java.util.Collection;
@@ -26,13 +28,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@WebMvcTest({InMemoryFilmStorage.class, FilmService.class})
+@WebMvcTest({FilmStorage.class, FilmService.class})
 class FilmServiceTest extends AbstractTest {
 
     @Autowired
     private FilmService         filmService;
-    @MockBean
-    private InMemoryFilmStorage storage;
+    @MockBean @Qualifier("inMemoryFilmStorage")
+    private FilmStorage storage;
 
 
     @Test

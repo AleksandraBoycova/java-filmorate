@@ -5,11 +5,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.yandex.practicum.filmorate.AbstractTest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.storage.impl.InMemoryUserStorage;
 
 import java.util.Collection;
@@ -23,13 +25,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@WebMvcTest({InMemoryUserStorage.class, UserService.class})
+@WebMvcTest({UserStorage.class, UserService.class})
 class UserServiceTest extends AbstractTest {
     @Autowired
     private UserService service;
 
-    @MockBean
-    private InMemoryUserStorage storage;
+    @MockBean @Qualifier ("inMemoryUserStorage")
+    private UserStorage storage;
+
 
     @Test
     void createUser() throws ValidationException {

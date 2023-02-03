@@ -18,12 +18,12 @@ import java.util.*;
 
 @Component ("dbFilmStorage")
 public class DbFilmStorage implements FilmStorage {
-
-    private final JdbcTemplate jdbcTemplate;
-    @Autowired
-    public DbFilmStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+ @Autowired
+    private JdbcTemplate jdbcTemplate;
+    //@Autowired
+    //public DbFilmStorage(JdbcTemplate jdbcTemplate) {
+      //  this.jdbcTemplate = jdbcTemplate;
+    //}
 
     @Override
     public Film create(Film film) {
