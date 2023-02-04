@@ -5,12 +5,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.impl.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,26 +41,27 @@ class InMemoryFilmStorageTest {
     @Test
     void deleteFilm() throws Exception {
         Film deletedFilm = storage.delete(currentFilm.getId());
-        assertThrows(FilmNotFoundException.class, () -> storage.getById(deletedFilm.getId()), "Фильм с id " + deletedFilm.getId() + " не найден");
+        assertTrue(storage.getById(deletedFilm.getId()).isEmpty());
     }
 
     @Test
     void deleteFilmWithError() {
-        assertThrows(FilmNotFoundException.class, () -> storage.delete(Long.MAX_VALUE), "Фильм с id " + Long.MAX_VALUE + " не найден");
+        assertThrows(NotFoundException.class, () -> storage.delete(Long.MAX_VALUE), "Фильм с id " + Long.MAX_VALUE + " не найден");
     }
 
     @Test
     void getFilm() throws Exception {
-        Film filmFromStorage = storage.getById(currentFilm.getId());
-        assertEquals("Морозко", filmFromStorage.getName());
-        assertEquals("Сказка", filmFromStorage.getDescription());
-        assertEquals(getLocalDateFromString("01.12.1980"), filmFromStorage.getReleaseDate());
-        assertEquals(90, filmFromStorage.getDuration());
+        Optional<Film> filmFromStorage = storage.getById(currentFilm.getId());
+        assertTrue(filmFromStorage.isPresent());
+        assertEquals("Морозко", filmFromStorage.get().getName());
+        assertEquals("Сказка", filmFromStorage.get().getDescription());
+        assertEquals(getLocalDateFromString("01.12.1980"), filmFromStorage.get().getReleaseDate());
+        assertEquals(90, filmFromStorage.get().getDuration());
     }
 
     @Test
-    void getFilmWithError() {
-        assertThrows(FilmNotFoundException.class, () -> storage.getById(Long.MAX_VALUE), "Фильм с id " + Long.MAX_VALUE + " не найден");
+    void getFilmWithError() throws Exception {
+        assertTrue(storage.getById(Long.MAX_VALUE).isEmpty());
     }
 
     @Test
@@ -83,7 +86,7 @@ class InMemoryFilmStorageTest {
         Film f = buildFilm("Снегурочка", "Сказка", "01.12.1981", 60);
         f.setId(Long.MAX_VALUE);
 
-        assertThrows(FilmNotFoundException.class, () -> storage.update(f), "Фильм с id " + Long.MAX_VALUE + " не найден");
+        assertThrows(NotFoundException.class, () -> storage.update(f), "Фильм с id " + Long.MAX_VALUE + " не найден");
     }
 
     @Test

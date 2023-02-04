@@ -1,15 +1,17 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.impl;
 
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
-@Component
-public class InMemoryFilmStorage implements FilmStorage{
+@Component ("inMemoryFilmStorage")
+public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> storage = new HashMap<>();
     private static long                    counter = 1L;
 
@@ -27,7 +29,7 @@ public class InMemoryFilmStorage implements FilmStorage{
             storage.put(id, film);
         }
         else {
-            throw new FilmNotFoundException("Фильм с id " + id +" не найден");
+            throw new NotFoundException("Фильм с id " + id +" не найден");
         }
         return film;
     }
@@ -40,7 +42,7 @@ public class InMemoryFilmStorage implements FilmStorage{
             return film;
         }
         else {
-            throw new FilmNotFoundException("Фильм с id " + id +" не найден");
+            throw new NotFoundException("Фильм с id " + id +" не найден");
         }
     }
 
@@ -50,13 +52,18 @@ public class InMemoryFilmStorage implements FilmStorage{
     }
 
     @Override
-    public Film getById(Long id) throws Exception {
-        if (storage.containsKey(id)){
-             return storage.get(id);
+    public Optional<Film> getById(Long id) throws Exception {
+        Film filmFromStorage = storage.get(id);
+        if (filmFromStorage != null) {
+            return Optional.of(filmFromStorage);
+        } else {
+            return Optional.empty();
         }
-        else {
-            throw new FilmNotFoundException("Фильм с id " + id +" не найден");
-        }
+    }
+
+    @Override
+    public boolean isExists(Long id) {
+        return storage.containsKey(id);
     }
 
     public void clearStorage(){

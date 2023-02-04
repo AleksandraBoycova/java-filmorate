@@ -5,8 +5,8 @@ import lombok.Data;
 
 @Data
 @JsonIgnoreProperties({"cause", "stackTrace", "suppressed", "localizedMessage"})
-public class FilmNotFoundException extends Exception implements ApiSubError {
-    public FilmNotFoundException(String message) {
+public class NotFoundException extends Exception implements ApiSubError{
+    public NotFoundException(String message) {
         super(message);
     }
 }

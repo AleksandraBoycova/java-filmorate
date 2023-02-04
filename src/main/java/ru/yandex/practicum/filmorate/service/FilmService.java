@@ -1,40 +1,49 @@
 package ru.yandex.practicum.filmorate.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class FilmService extends AbstractService <Film>{
    private final DateTimeFormatter formatter;
 
-
-    public FilmService(InMemoryFilmStorage storage) {
+    @Autowired
+    public FilmService(@Qualifier("dbFilmStorage") FilmStorage storage) {
         super(storage);
         formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     }
 
     public void likeFilm(Long filmId, Long userId) throws Exception {
-        Film filmFromStorage = storage.getById(filmId);
-        filmFromStorage.getLikes().add(userId);
-        storage.update(filmFromStorage);
+        Optional<Film> filmFromStorage = storage.getById(filmId);
+        if (filmFromStorage.isEmpty()) {
+            throw new NotFoundException("Film not found");
+        }
+        filmFromStorage.get().getLikes().add(userId);
+        storage.update(filmFromStorage.get());
     }
 
     public void dislikeFilm(Long filmId, Long userId) throws Exception {
-        Film filmFromStorage = storage.getById(filmId);
-        if (filmFromStorage.getLikes().contains(userId)) {
-            filmFromStorage.getLikes().remove(userId);
-            storage.update(filmFromStorage);
+        Optional<Film> filmFromStorage = storage.getById(filmId);
+        if (filmFromStorage.isEmpty()) {
+            throw new NotFoundException("Film not found");
+        }
+        if (filmFromStorage.get().getLikes().contains(userId)) {
+            filmFromStorage.get().getLikes().remove(userId);
+            storage.update(filmFromStorage.get());
         } else {
-            throw new UserNotFoundException("Пользователь " + userId + " не ставил лайк к фильму " + filmId);
+            throw new NotFoundException("Пользователь " + userId + " не ставил лайк к фильму " + filmId);
         }
     }
 

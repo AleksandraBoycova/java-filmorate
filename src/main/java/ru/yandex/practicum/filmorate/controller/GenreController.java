@@ -1,0 +1,38 @@
+package ru.yandex.practicum.filmorate.controller;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.service.GenreService;
+
+import javax.validation.Valid;
+
+
+@RestController
+@Slf4j
+@RequestMapping("genres")
+public class GenreController extends AbstractController <Genre> {
+    private GenreService genreService;
+
+    @Autowired
+    public GenreController(GenreService genreService) {
+        super(genreService);
+        this.genreService = genreService;
+    }
+
+    @PostMapping
+    public Genre createGenre(@Valid @RequestBody Genre genre)
+            throws ValidationException {
+        return super.create(genre);
+    }
+
+    @PutMapping
+    public Genre updateGenre(@Valid @RequestBody Genre genre)
+            throws Exception {
+        return super.update(genre);
+    }
+
+
+}
