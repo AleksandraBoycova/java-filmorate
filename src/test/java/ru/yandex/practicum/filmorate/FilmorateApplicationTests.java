@@ -96,7 +96,7 @@ public class FilmorateApplicationTests {
         film.setDescription("description");
         film.setReleaseDate(LocalDate.now());
         film.setDuration(120);
-        film.setGenre(Set.of(new Genre(1L, "Комедия")));
+        film.setGenres(Set.of(new Genre(1L, "Комедия")));
         film.setMpa(new MPA(1L,"G", "у фильма нет возрастных ограничений"));
     }
 
@@ -105,7 +105,7 @@ public class FilmorateApplicationTests {
         Film film = buildFilm(null, "name", "description", LocalDate.now(), 120, Set.of(buildGenre(1L, "Комедия")), new MPA(1L,"G", "у фильма нет возрастных ограничений"));
         Film createdFilm = filmStorage.create(film);
         createdFilm.setName("new name");
-        Film updatedFilm = filmStorage.update(film);
+        Film updatedFilm = filmStorage.update(createdFilm);
         assertEquals(5L, updatedFilm.getId());
         assertEquals("new name", updatedFilm.getName());
     }
@@ -117,7 +117,7 @@ public class FilmorateApplicationTests {
         film.setDescription(description);
         film.setReleaseDate(releaseDate);
         film.setDuration(duration);
-        film.setGenre(Set.of(new Genre(1L,"Комедия")));
+        film.setGenres(Set.of(new Genre(1L,"Комедия")));
         film.setMpa(new MPA(1L,"G", "у фильма нет возрастных ограничений"));
         return film;
     }
@@ -141,7 +141,7 @@ public class FilmorateApplicationTests {
         film.setDescription("dsc");
         film.setReleaseDate(LocalDate.now());
         film.setMpa(new MPA(1L, "G", "dsc"));
-        film.setGenre(new HashSet<>());
+        film.setGenres(new HashSet<>());
         Film filmToDelete        = filmStorage.create(film);
         Film deletedFilm = filmStorage.delete(filmToDelete.getId());
         assertFalse(filmStorage.getAll().contains(deletedFilm));

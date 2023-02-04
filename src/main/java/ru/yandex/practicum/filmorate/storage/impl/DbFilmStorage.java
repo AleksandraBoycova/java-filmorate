@@ -49,11 +49,16 @@ public class DbFilmStorage implements FilmStorage {
             return ps;
         }, keyHolder);
         if (keyHolder.getKey() != null) {
-            film.setId(keyHolder.getKey().longValue());
-            if (film.getGenre() != null) {
-            updateFilmGenreTable(film.getId(), film.getGenre());}
-            updateLikes(film);
-            return film;
+            if (film.getGenres() != null) {
+                updateFilmGenreTable(keyHolder.getKey().longValue(), film.getGenres());
+            }
+            updateLikes(film)
+            ;
+            try {
+                return getById(keyHolder.getKey().longValue()).orElse(null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return null;
     }
@@ -95,9 +100,9 @@ public class DbFilmStorage implements FilmStorage {
         args.add(film.getId());
         String finalUpdateStatement = updateStatement;
         jdbcTemplate.update(finalUpdateStatement, args.toArray());
-        if (film.getGenre() != null) {
+        if (film.getGenres() != null) {
 
-        updateFilmGenreTable(film.getId(), film.getGenre());}
+        updateFilmGenreTable(film.getId(), film.getGenres());}
 updateLikes(film);
         return getById(film.getId()).orElse(null);
     }
@@ -121,7 +126,7 @@ updateLikes(film);
     public Collection<Film> getAll() {
         String     selectStatement = "SELECT films.*, mpa.* FROM films join mpa on mpa.mpa_id = films.mpa_id";
         List<Film> films           = jdbcTemplate.query(selectStatement, new FilmRowMapper());
-        films.forEach(film -> film.setGenre(new HashSet<>(getGenreListForFilm(film.getId()))));
+        films.forEach(film -> film.setGenres(new HashSet<>(getGenreListForFilm(film.getId()))));
         return films;
     }
 
@@ -135,7 +140,7 @@ updateLikes(film);
         if (film == null) {
             return Optional.empty();
         }
-        film.setGenre(new HashSet<>(getGenreListForFilm(id)));
+        film.setGenres(new HashSet<>(getGenreListForFilm(id)));
         film.setLikes(new HashSet<>(getFilmLikes(id)));
         return Optional.of(film);
     }
