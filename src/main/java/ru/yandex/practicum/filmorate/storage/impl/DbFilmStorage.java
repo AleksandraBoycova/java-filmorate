@@ -136,6 +136,7 @@ updateLikes(film);
             return Optional.empty();
         }
         film.setGenre(new HashSet<>(getGenreListForFilm(id)));
+        film.setLikes(new HashSet<>(getFilmLikes(id)));
         return Optional.of(film);
     }
 
@@ -170,5 +171,9 @@ updateLikes(film);
             String s = "INSERT INTO film_like (film_id, user_id) VALUES (?,?)";
             jdbcTemplate.update(s, film.getId(), userId);
         });
+    }
+    private Collection<Long> getFilmLikes(Long filmId) {
+        String s = "SELECT user_id FROM film_like WHERE film_id=?";
+        return jdbcTemplate.queryForList(s, Long.class, filmId);
     }
 }
