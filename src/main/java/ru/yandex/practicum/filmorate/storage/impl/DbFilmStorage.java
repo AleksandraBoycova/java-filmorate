@@ -126,7 +126,7 @@ updateLikes(film);
     public Collection<Film> getAll() {
         String     selectStatement = "SELECT films.*, mpa.* FROM films join mpa on mpa.mpa_id = films.mpa_id";
         List<Film> films           = jdbcTemplate.query(selectStatement, new FilmRowMapper());
-        films.forEach(film -> film.setGenres(new HashSet<>(getGenreListForFilm(film.getId()))));
+        films.forEach(film -> film.setGenres(new LinkedHashSet<>(getGenreListForFilm(film.getId()))));
         return films;
     }
 
@@ -140,7 +140,7 @@ updateLikes(film);
         if (film == null) {
             return Optional.empty();
         }
-        film.setGenres(new HashSet<>(getGenreListForFilm(id)));
+        film.setGenres(new LinkedHashSet<>(getGenreListForFilm(id)));
         film.setLikes(new HashSet<>(getFilmLikes(id)));
         return Optional.of(film);
     }
@@ -157,7 +157,7 @@ updateLikes(film);
 
     private List<Genre> getGenreListForFilm(Long id) {
         List<Genre> query = jdbcTemplate.query("SELECT fg.film_id, g.genre_id, g.genre_name FROM film_genre as fg" +
-                " left join genre g on g.genre_id = fg.genre_id WHERE film_id=?", new GenreRowMapper(), id);
+                " left join genre g on g.genre_id = fg.genre_id WHERE film_id=? order by genre_id", new GenreRowMapper(), id);
         return query;
     }
 
