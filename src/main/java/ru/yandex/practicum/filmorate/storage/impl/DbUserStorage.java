@@ -42,7 +42,7 @@ public class DbUserStorage implements UserStorage {
         }, keyHolder);
         if (keyHolder.getKey() != null) {
             user.setId(keyHolder.getKey().longValue());
-            user.getFriends().forEach(friendId -> updateFriendship(user.getId(), friendId));
+           updateFriendship(user);
             return user;
         }
         return null;
@@ -79,7 +79,7 @@ public class DbUserStorage implements UserStorage {
         args.add(user.getId());
         String finalUpdateStatement = updateStatement;
         jdbcTemplate.update(finalUpdateStatement, args.toArray());
-        user.getFriends().forEach(friendId -> updateFriendship(user.getId(), friendId));
+        updateFriendship(user);
 
         return getById(user.getId()).orElse(null);
     }
@@ -132,5 +132,23 @@ public class DbUserStorage implements UserStorage {
         }else {
             return false;
         }
+    }
+
+    private void updateFriendshipStatus(Long userId, Long friendId) {
+        String updateStatement = "UPDATE friendship SET friendship_status=? WHERE user_id=? AND friend_id=? AND EXISTS (SELECT 1 FROM friendship WHERE user_id=? and friend_id=?);" +
+                "UPDATE friendship SET friendship_status=? WHERE user_id=? AND friend_id=? AND (SELECT friendship_status FROM friendship WHERE user_id=? AND friend_id=?) = ?;";
+        jdbcTemplate.update(updateStatement, FriendshipStatus.ACCEPTED.name(), userId, friendId, friendId, userId,
+                FriendshipStatus.ACCEPTED.name(), friendId, userId, userId, friendId, FriendshipStatus.ACCEPTED.name());
+    }
+
+    private void updateFriendship(User user) {
+        String statement = "DELETE FROM friendship WHERE user_id=?";
+        jdbcTemplate.update(statement, user.getId());
+        user.getFriends().forEach(friendId -> {
+            String createFriendshipEntry = "INSERT INTO friendship (user_id, friend_id, friendship_status) VALUES (?, ?, ?)";
+            jdbcTemplate.update(createFriendshipEntry, user.getId(), friendId, FriendshipStatus.NOT_ACCEPTED.name());
+            updateFriendshipStatus(user.getId(), friendId);
+        });
+
     }
 }

@@ -52,6 +52,7 @@ public class DbFilmStorage implements FilmStorage {
             film.setId(keyHolder.getKey().longValue());
             if (film.getGenre() != null) {
             updateFilmGenreTable(film.getId(), film.getGenre());}
+            updateLikes(film);
             return film;
         }
         return null;
@@ -97,7 +98,7 @@ public class DbFilmStorage implements FilmStorage {
         if (film.getGenre() != null) {
 
         updateFilmGenreTable(film.getId(), film.getGenre());}
-
+updateLikes(film);
         return getById(film.getId()).orElse(null);
     }
 
@@ -160,5 +161,14 @@ public class DbFilmStorage implements FilmStorage {
 
         String createFilmGenreEntry = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
         genreSet.forEach(g -> jdbcTemplate.update(createFilmGenreEntry, filmId, g.getId()));
+    }
+
+    private void updateLikes(Film film) {
+        String statement = "DELETE FROM film_like WHERE film_id=?";
+        jdbcTemplate.update(statement, film.getId());
+        film.getLikes().forEach(userId -> {
+            String s = "INSERT INTO film_like (film_id, user_id) VALUES (?,?)";
+            jdbcTemplate.update(s, film.getId(), userId);
+        });
     }
 }

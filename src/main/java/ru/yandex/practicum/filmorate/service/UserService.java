@@ -64,7 +64,7 @@ public class UserService extends AbstractService <User>{
         if (friend.isEmpty()) {
             throw new NotFoundException("User with id " + friendId + " not found");
         }
-        if (user.get().getFriends().contains(friendId) && friend.get().getFriends().contains(id)) {
+        if (user.get().getFriends().contains(friendId)) {
             user.get().getFriends().remove(friendId);
             userStorage.update(user.get());
         } else {
